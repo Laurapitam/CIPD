@@ -1261,8 +1261,41 @@ function toast(msg,type='ok'){
 }
 
 // ===== INIT =====
+  cargarProyectosDesdeDB();
 renderDashboard();
 renderSesion();
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+const supabaseClient = supabase.createClient(
+  https://llhlkwlpxbzbopmgkqid.supabase.co,
+  sb_publishable_yWtc0C8nNTjLxAQPHv6AHw_Rfqf5Fqr
+);
 </script>
+</script async function cargarProyectosDesdeDB() {
+  const { data, error } = await supabaseClient
+    .from('proyectos')
+    .select('*');
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  const tbody = document.getElementById("tbl-proyectos");
+
+  tbody.innerHTML = data.map(p => `
+    <tr>
+      <td>${p.id}</td>
+      <td>${p.nombre}</td>
+      <td>${p.lider}</td>
+      <td>${p.gerencia}</td>
+      <td>${p.avance}%</td>
+      <td>${p.fecha_entrega}</td>
+      <td>${p.estado}</td>
+      <td>-</td>
+    </tr>
+  `).join('');
+}>
 </body>
 </html>
