@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>CIPD — Secretaría Ejecutiva</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root {
   --navy: #0D1B2A;
@@ -247,9 +248,93 @@ textarea{min-height:80px;resize:vertical;}
   .sidebar{transform:translateX(-100%);}
   .main{margin-left:0;}
 }
+
+/* ===== AUTH LAYER ===== */
+#auth-layer{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:999;transition:opacity .4s;}
+#auth-layer.hidden{opacity:0;pointer-events:none;}
+.auth-card{background:#162436;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:44px 40px;width:420px;max-width:94vw;}
+.auth-logo{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:#fff;letter-spacing:-1px;margin-bottom:4px;}
+.auth-sub{font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:32px;font-weight:300;}
+.auth-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:20px;}
+.auth-field{margin-bottom:16px;}
+.auth-field label{display:block;font-size:12px;font-weight:500;color:rgba(255,255,255,0.5);margin-bottom:6px;letter-spacing:.3px;}
+.auth-field input{width:100%;padding:11px 14px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;font-size:14px;color:#fff;font-family:'IBM Plex Sans',sans-serif;outline:none;transition:border .15s;}
+.auth-field input:focus{border-color:var(--blue);}
+.auth-field input::placeholder{color:rgba(255,255,255,0.25);}
+.auth-btn{width:100%;padding:12px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:14px;font-family:'IBM Plex Sans',sans-serif;font-weight:600;cursor:pointer;transition:background .15s;margin-top:4px;}
+.auth-btn:hover{background:var(--blue2);}
+.auth-btn:disabled{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.3);cursor:not-allowed;}
+.auth-err{background:rgba(255,59,92,0.12);border:1px solid rgba(255,59,92,0.3);color:#ff8fa3;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;}
+.auth-err.show{display:block;}
+.auth-ok{background:rgba(0,196,140,0.12);border:1px solid rgba(0,196,140,0.25);color:#7fedd8;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:14px;display:none;}
+.auth-ok.show{display:block;}
+.auth-link{font-size:12px;color:rgba(255,255,255,0.35);text-align:center;margin-top:16px;cursor:pointer;}
+.auth-link span{color:var(--blue2);cursor:pointer;}
+.auth-link span:hover{text-decoration:underline;}
+.auth-divider{border:none;border-top:1px solid rgba(255,255,255,0.07);margin:20px 0;}
+.config-banner{background:#FFF3CD;border:1px solid #FFCA28;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:13px;color:#7A5800;display:none;}
+.config-banner.show{display:block;}
+.config-banner code{background:rgba(0,0,0,0.08);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:12px;}
+/* User pill in topbar */
+.user-pill{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 6px;background:var(--gray1);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:background .15s;}
+.user-pill:hover{background:var(--gray2);}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.user-name{font-size:12px;font-weight:500;color:var(--navy);}
+.user-role{font-size:10px;color:var(--gray4);}
+/* Reset password view */
+#view-reset{display:none;}
+#view-reset.show{display:block;}
+#view-login.hidden{display:none;}
+
 </style>
 </head>
 <body>
+
+
+<!-- ===== AUTH LAYER ===== -->
+<div id="auth-layer">
+  <div class="auth-card">
+    <div class="auth-logo">CIPD</div>
+    <div class="auth-sub">Secretaría Ejecutiva · Energía Honduras</div>
+
+    <!-- Config warning (shown when keys are placeholder) -->
+    <div class="config-banner" id="config-banner">
+      <strong>Configuración pendiente:</strong> Reemplaza las claves de Supabase en el código antes de usar el sistema.<br>
+      Busca <code>TU_URL_AQUI</code> y <code>TU_CLAVE_AQUI</code> en el archivo HTML.
+    </div>
+
+    <!-- Login form -->
+    <div id="view-login">
+      <div class="auth-title">Iniciar sesión</div>
+      <div class="auth-err" id="login-err"></div>
+      <div class="auth-field">
+        <label>Correo institucional</label>
+        <input type="email" id="login-email" placeholder="tucorreo@empresa.hn" autocomplete="email"/>
+      </div>
+      <div class="auth-field">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">Ingresar al sistema</button>
+      <div class="auth-link">¿Olvidaste tu contraseña? <span onclick="showReset()">Restablecer aquí</span></div>
+    </div>
+
+    <!-- Reset password form -->
+    <div id="view-reset">
+      <div class="auth-title">Restablecer contraseña</div>
+      <div class="auth-err" id="reset-err"></div>
+      <div class="auth-ok" id="reset-ok"></div>
+      <div class="auth-field">
+        <label>Correo institucional</label>
+        <input type="email" id="reset-email" placeholder="tucorreo@empresa.hn"/>
+      </div>
+      <button class="auth-btn" id="reset-btn" onclick="doReset()">Enviar enlace de restablecimiento</button>
+      <div class="auth-link"><span onclick="showLogin()">← Volver al inicio de sesión</span></div>
+    </div>
+  </div>
+</div>
+
+
 <div class="shell">
 
 <!-- SIDEBAR -->
@@ -311,6 +396,10 @@ textarea{min-height:80px;resize:vertical;}
     <div class="topbar-actions">
       <button class="btn btn-outline btn-sm" onclick="openModal('nueva-solicitud')">+ Nueva solicitud</button>
       <button class="btn btn-primary btn-sm" onclick="openModal('nueva-sesion')">Convocar sesión</button>
+      <div class="user-pill" id="user-pill" onclick="doLogout()" title="Clic para cerrar sesión">
+        <div class="user-avatar" id="user-avatar">—</div>
+        <div><div class="user-name" id="user-name">—</div><div class="user-role" id="user-role">Cerrar sesión</div></div>
+      </div>
     </div>
   </div>
 
@@ -814,127 +903,300 @@ textarea{min-height:80px;resize:vertical;}
 
 <div class="toast-wrap" id="toast-wrap"></div>
 
+<!-- MODALS -->
+<div id="modal-bg" class="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="modal-title" id="modal-title">Modal</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer"></div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
 <script>
-// ===== SUPABASE CONFIG =====
-const SUPABASE_URL = 'https://lmclohuonpbhhzfwlfst.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_Y86OcZQ2FseKbUI5xT5rpQ_922xTKE_';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ===== ESTADO REACTIVO =====
-let PROJECTS  = [];
-let BACKLOG   = [];
-let RISKS     = [];
-let ACUERDOS  = [];
-let AGENDA    = [];
-let CHECKLIST = [];
-let checkState = [];
+// ╔══════════════════════════════════════════════════════════════════╗
+// ║  CONFIGURACIÓN SUPABASE — EDITA SOLO ESTAS DOS LÍNEAS           ║
+// ║  Encuentra estos valores en: Supabase → Settings → API          ║
+// ╚══════════════════════════════════════════════════════════════════╝
+const SUPABASE_URL  = 'https://llhlkwlpxbzbopmgkqid.supabase.co';       // Ej: https://xxxx.supabase.co
+const SUPABASE_ANON = 'sb_publishable_yWtc0C8nNTjLxAQPHv6AHw_Rfqf5Fqr';     // Clave anon/public
 
-// ===== DIMENSIONS (estáticas — no cambian) =====
+// ── Supabase client (cargado desde CDN) ──────────────────────────────
+let _supa = null;
+function getSupa() {
+  if (_supa) return _supa;
+  if (typeof supabase === 'undefined') { console.error('Supabase SDK no cargado'); return null; }
+  _supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  return _supa;
+}
+
+// ── Estado de la sesión ───────────────────────────────────────────────
+let currentUser = null;
+
+// ── Verificar si las claves son placeholder ───────────────────────────
+function isConfigured() {
+  return SUPABASE_URL !== 'TU_URL_AQUI' && SUPABASE_ANON !== 'TU_CLAVE_AQUI';
+}
+
+// ── Inicializar: revisar sesión existente ─────────────────────────────
+async function authInit() {
+  const banner = document.getElementById('config-banner');
+
+  if (!isConfigured()) {
+    if (banner) banner.classList.add('show');
+    // Modo demo: entrar directo sin autenticación real
+    showApp({ email: 'demo@cipd.hn', user_metadata: { nombre: 'Usuario Demo', rol: 'Secretaría Ejecutiva' } });
+    return;
+  }
+
+  const supa = getSupa();
+  if (!supa) return;
+
+  // Escuchar cambios de sesión (login/logout automático)
+  supa.auth.onAuthStateChange((_event, session) => {
+    if (session?.user) {
+      currentUser = session.user;
+      showApp(session.user);
+    } else {
+      currentUser = null;
+      showAuthLayer();
+    }
+  });
+
+  // Revisar sesión guardada en el navegador
+  const { data: { session } } = await supa.auth.getSession();
+  if (session?.user) {
+    currentUser = session.user;
+    showApp(session.user);
+  } else {
+    showAuthLayer();
+  }
+}
+
+// ── Mostrar pantalla de login ─────────────────────────────────────────
+function showAuthLayer() {
+  document.getElementById('auth-layer').classList.remove('hidden');
+  document.getElementById('login-email')?.focus();
+}
+
+// ── Mostrar la app tras login exitoso ────────────────────────────────
+function showApp(user) {
+  const layer = document.getElementById('auth-layer');
+  layer.classList.add('hidden');
+  setTimeout(() => layer.style.display = 'none', 400);
+
+  // Actualizar pill de usuario en topbar
+  const email = user.email || '';
+  const meta  = user.user_metadata || {};
+  const nombre = meta.nombre || meta.name || meta.full_name || email.split('@')[0] || 'Usuario';
+  const rol    = meta.rol   || meta.role  || 'Secretaría CIPD';
+  const initials = nombre.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase() || email[0]?.toUpperCase() || 'U';
+
+  const av = document.getElementById('user-avatar');
+  const nm = document.getElementById('user-name');
+  const rl = document.getElementById('user-role');
+  if (av) av.textContent = initials;
+  if (nm) nm.textContent = nombre.length > 18 ? nombre.substring(0,16)+'…' : nombre;
+  if (rl) rl.textContent = rol;
+  // Make app visible now that user is authenticated
+  const shell = document.querySelector('.shell');
+  if (shell) shell.style.visibility = 'visible';
+  renderDashboard();
+  renderSesion();
+}
+
+// ── Hacer login con email + contraseña ────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-err');
+  const btn   = document.getElementById('login-btn');
+
+  errEl.classList.remove('show');
+  if (!email || !pass) { showAuthErr(errEl, 'Ingresa tu correo y contraseña.'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Verificando…';
+
+  if (!isConfigured()) {
+    // Modo demo
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Ingresar al sistema';
+      showApp({ email, user_metadata: { nombre: email.split('@')[0], rol: 'Secretaría Ejecutiva' } });
+    }, 800);
+    return;
+  }
+
+  const supa = getSupa();
+  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+
+  btn.disabled = false;
+  btn.textContent = 'Ingresar al sistema';
+
+  if (error) {
+    const msg = error.message.includes('Invalid') ? 'Correo o contraseña incorrectos.' :
+                error.message.includes('Email not confirmed') ? 'Debes confirmar tu correo antes de ingresar.' :
+                error.message;
+    showAuthErr(errEl, msg);
+  }
+  // Si fue exitoso, onAuthStateChange() dispara showApp()
+}
+
+// ── Restablecer contraseña ────────────────────────────────────────────
+async function doReset() {
+  const email = document.getElementById('reset-email').value.trim();
+  const errEl = document.getElementById('reset-err');
+  const okEl  = document.getElementById('reset-ok');
+  const btn   = document.getElementById('reset-btn');
+
+  errEl.classList.remove('show');
+  okEl.classList.remove('show');
+  if (!email) { showAuthErr(errEl, 'Ingresa tu correo institucional.'); return; }
+
+  if (!isConfigured()) {
+    okEl.textContent = 'Modo demo: en producción se enviaría el correo de restablecimiento.';
+    okEl.classList.add('show'); return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Enviando…';
+  const supa = getSupa();
+  const { error } = await supa.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.href
+  });
+  btn.disabled = false;
+  btn.textContent = 'Enviar enlace de restablecimiento';
+
+  if (error) { showAuthErr(errEl, error.message); }
+  else {
+    okEl.textContent = 'Revisa tu correo. Recibirás un enlace para restablecer tu contraseña.';
+    okEl.classList.add('show');
+  }
+}
+
+// ── Cerrar sesión ─────────────────────────────────────────────────────
+async function doLogout() {
+  if (!confirm('¿Deseas cerrar sesión?')) return;
+  if (isConfigured()) {
+    const supa = getSupa();
+    await supa.auth.signOut();
+  }
+  currentUser = null;
+  const layer = document.getElementById('auth-layer');
+  layer.style.display = 'flex';
+  layer.classList.remove('hidden');
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-err').classList.remove('show');
+  showLogin();
+}
+
+// ── Helpers de UI ─────────────────────────────────────────────────────
+function showAuthErr(el, msg) { el.textContent = msg; el.classList.add('show'); }
+function showReset() {
+  document.getElementById('view-login').classList.add('hidden');
+  document.getElementById('view-reset').classList.remove('show');
+  document.getElementById('view-reset').style.display = 'block';
+  document.getElementById('view-reset').classList.add('show');
+}
+function showLogin() {
+  document.getElementById('view-reset').style.display = 'none';
+  document.getElementById('view-login').classList.remove('hidden');
+}
+
+// ── Enter key en campos ──────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    const layer = document.getElementById('auth-layer');
+    if (!layer.classList.contains('hidden') && layer.style.display !== 'none') {
+      const resetVisible = document.getElementById('view-reset').style.display === 'block';
+      resetVisible ? doReset() : doLogin();
+    }
+  }
+});
+
+
+// ===== APP SCRIPT =====
+// ===== DATA =====
 const DIMS = [
-  {id:'op',  label:'Impacto Operativo',           desc:'Afectación al suministro si no se implementa'},
+  {id:'op', label:'Impacto Operativo', desc:'Afectación al suministro si no se implementa'},
   {id:'com', label:'Impacto Comercial / Cliente', desc:'Efecto en facturación, cobro, atención'},
-  {id:'reg', label:'Riesgo Regulatorio / CREE',   desc:'Exposición a sanciones o incumplimientos'},
-  {id:'est', label:'Valor Estratégico',            desc:'Alineación con el plan estratégico'},
-  {id:'urg', label:'Urgencia Temporal',            desc:'Fechas límite o restricciones externas'},
+  {id:'reg', label:'Riesgo Regulatorio / CREE', desc:'Exposición a sanciones o incumplimientos'},
+  {id:'est', label:'Valor Estratégico', desc:'Alineación con el plan estratégico'},
+  {id:'urg', label:'Urgencia Temporal', desc:'Fechas límite o restricciones externas'},
 ];
 let dimVals = {op:0,com:0,reg:0,est:0,urg:0};
 
-// ===== LOADER =====
-function showLoader(msg='Cargando...'){
-  let el=document.getElementById('cipd-loader');
-  if(!el){
-    el=document.createElement('div');
-    el.id='cipd-loader';
-    el.style.cssText='position:fixed;inset:0;background:rgba(13,27,42,.55);z-index:999;display:flex;align-items:center;justify-content:center;';
-    el.innerHTML=`<div style="background:#fff;border-radius:12px;padding:24px 36px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.18);">
-      <div style="font-family:Syne,sans-serif;font-size:16px;font-weight:700;color:#0D1B2A;margin-bottom:6px;">CIPD</div>
-      <div style="font-size:13px;color:#7A88A0;" id="loader-msg">${msg}</div>
-    </div>`;
-    document.body.appendChild(el);
-  } else {
-    document.getElementById('loader-msg').textContent=msg;
-  }
-}
-function hideLoader(){
-  const el=document.getElementById('cipd-loader');
-  if(el) el.remove();
-}
+const PROJECTS = [
+  {id:'TI-018',glpi:'#4821',name:'Migración BD Regulatoria',gerencia:'TI',lider:'R. Mejía',avance:45,entrega:'15 Abr',status:'red',hito:'Entrega datos Q1',perfil:'C'},
+  {id:'GDist-024',glpi:'#4856',name:'Modernización subestaciones zona sur',gerencia:'Distribución',lider:'C. Andrade',avance:10,entrega:'30 Jun',status:'green',hito:'Diseño conceptual',perfil:'A'},
+  {id:'GCom-019',glpi:'#4780',name:'Portal atención al cliente',gerencia:'Comercial',lider:'L. Paz',avance:88,entrega:'25 Abr',status:'green',hito:'UAT final',perfil:'A'},
+  {id:'TI-021',glpi:'#4834',name:'Actualización SCADA',gerencia:'TI',lider:'M. Torres',avance:55,entrega:'30 Abr',status:'yellow',hito:'Módulo alarmas',perfil:'B'},
+  {id:'AMR-003',glpi:'#4802',name:'Integración medidores AMI',gerencia:'Distribución',lider:'J. Flores',avance:62,entrega:'15 May',status:'yellow',hito:'Piloto zona norte',perfil:'B'},
+  {id:'FIN-009',glpi:'#4845',name:'Conciliación bancaria automática',gerencia:'Financiero',lider:'A. Ramos',avance:30,entrega:'31 May',status:'yellow',hito:'Reglas conciliación',perfil:'B'},
+  {id:'TI-022',glpi:'#4871',name:'Seguridad perimetral red',gerencia:'TI',lider:'H. Soto',avance:70,entrega:'10 Abr',status:'red',hito:'Firewall zona DMZ',perfil:'C'},
+  {id:'GCom-027',glpi:'#4880',name:'Medición inteligente tarifas',gerencia:'Comercial',lider:'P. Girón',avance:15,entrega:'30 Jul',status:'green',hito:'Análisis tarifario',perfil:'A'},
+  {id:'GDist-020',glpi:'#4798',name:'GIS red distribución',gerencia:'Distribución',lider:'—',avance:0,entrega:'—',status:'red',hito:'Sin asignar',perfil:'C'},
+  {id:'RRHH-005',glpi:'#4812',name:'LMS capacitación técnica',gerencia:'RRHH',lider:'S. López',avance:40,entrega:'15 Jun',status:'green',hito:'Módulo seguridad eléctrica',perfil:'A'},
+  {id:'LEG-002',glpi:'#4855',name:'Sistema gestión contratos',gerencia:'Legal',lider:'T. Reyes',avance:25,entrega:'30 Jul',status:'yellow',hito:'Prototipo flujos',perfil:'B'},
+  {id:'FIN-011',glpi:'#4890',name:'Dashboard financiero gerencial',gerencia:'Financiero',lider:'E. Cruz',avance:60,entrega:'20 May',status:'green',hito:'Módulo proyecciones',perfil:'A'},
+];
 
-// ===== CARGA INICIAL DESDE SUPABASE =====
-async function loadAllData(){
-  showLoader('Conectando con Supabase...');
-  try {
-    const [
-      {data: projects,  error: e1},
-      {data: backlog,   error: e2},
-      {data: risks,     error: e3},
-      {data: acuerdos,  error: e4},
-      {data: agenda,    error: e5},
-      {data: checklist, error: e6},
-    ] = await Promise.all([
-      sb.from('projects').select('*').order('id'),
-      sb.from('backlog').select('*').order('score', {ascending:false}),
-      sb.from('risks').select('*').order('created_at'),
-      sb.from('acuerdos').select('*').order('num'),
-      sb.from('agenda_items').select('*').order('orden'),
-      sb.from('checklist_items').select('*').order('orden'),
-    ]);
+const BACKLOG = [
+  {id:'SOL-031',glpi:'#4892',name:'Sistema GIS distribución red',gerencia:'Distribución',score:23,nivel:'CRÍTICO',estado:'En evaluación',fecha:'10 Abr 2025'},
+  {id:'SOL-029',glpi:'#4901',name:'Automatización cortes y reconexiones',gerencia:'Distribución',score:21,nivel:'CRÍTICO',estado:'En evaluación',fecha:'08 Abr 2025'},
+  {id:'SOL-030',glpi:'#4888',name:'Módulo gestión pérdidas técnicas',gerencia:'TI',score:18,nivel:'ALTO',estado:'Aprobado',fecha:'07 Abr 2025'},
+  {id:'SOL-028',glpi:'#4875',name:'CRM clientes masivos',gerencia:'Comercial',score:17,nivel:'ALTO',estado:'Aprobado',fecha:'03 Abr 2025'},
+  {id:'SOL-026',glpi:'#4862',name:'Integración SAP-SCADA',gerencia:'TI',score:16,nivel:'ALTO',estado:'En evaluación',fecha:'28 Mar 2025'},
+  {id:'SOL-025',glpi:'#4849',name:'App móvil lectura de medidores',gerencia:'Comercial',score:13,nivel:'MEDIO',estado:'Pendiente',fecha:'20 Mar 2025'},
+  {id:'SOL-024',glpi:'#4836',name:'Capacitación LMS personal técnico',gerencia:'RRHH',score:9,nivel:'MEDIO',estado:'Pendiente',fecha:'15 Mar 2025'},
+  {id:'SOL-023',glpi:'#4822',name:'Rediseño intranet corporativa',gerencia:'TI',score:6,nivel:'BAJO',estado:'Pendiente',fecha:'10 Mar 2025'},
+];
 
-    if(e1||e2||e3||e4||e5||e6){
-      const err = e1||e2||e3||e4||e5||e6;
-      throw new Error(err.message);
-    }
+const RISKS = [
+  {nombre:'Retraso proveedor BD Regulatoria',proyecto:'TI-018',tipo:'Técnico',prob:4,impacto:4,nivel:'ALTO',estado:'Activo',plan:'Evaluar proveedor alternativo'},
+  {nombre:'Atraso importación hardware AMR',proyecto:'AMR-003',tipo:'Recursos',prob:3,impacto:4,nivel:'ALTO',estado:'Mitigando',plan:'Gestión aduanal urgente'},
+  {nombre:'Capacidad equipo TI al límite',proyecto:'TI-022',tipo:'Recursos',prob:4,impacto:3,nivel:'ALTO',estado:'Activo',plan:'Solicitud horas extra pendiente'},
+  {nombre:'Cambio normativa CREE pendiente',proyecto:'GDist-024',tipo:'Regulatorio',prob:2,impacto:5,nivel:'MEDIO',estado:'Monitoreando',plan:'Seguimiento activo con Legal'},
+  {nombre:'Rotación líder proyecto FIN-009',proyecto:'FIN-009',tipo:'Organizacional',prob:2,impacto:3,nivel:'MEDIO',estado:'Mitigando',plan:'Plan de sucesión en preparación'},
+];
 
-    PROJECTS  = (projects  || []).map(p => ({...p, status: p.status||'green'}));
-    BACKLOG   = backlog   || [];
-    RISKS     = risks     || [];
-    ACUERDOS  = acuerdos  || [];
-    AGENDA    = (agenda   || []).map(a => ({time:a.time_slot, title:a.title, desc:a.description}));
-    CHECKLIST = checklist || [];
-    checkState = CHECKLIST.map(c => c.completado || false);
+const ACUERDOS = [
+  {num:1,texto:'Aprobar SOL-031 para inicio Q2',resp:'Gte. Planificación',fecha:'03 Abr',estado:'Pendiente'},
+  {num:2,texto:'Contratar proveedor alternativo BD Regulatoria',resp:'Gte. TI',fecha:'25 Mar',estado:'En proceso'},
+  {num:3,texto:'Solicitar presupuesto adicional subestaciones a Gte. General',resp:'Secretaría',fecha:'22 Mar',estado:'En proceso'},
+  {num:4,texto:'Validar UAT Portal Cliente con Gerencia Comercial',resp:'Gte. Comercial',fecha:'24 Mar',estado:'Completado'},
+];
 
-    // Actualizar badges del sidebar
-    document.getElementById('badge-backlog').textContent = BACKLOG.length;
-    const riesgosAltos = RISKS.filter(r=>r.nivel==='ALTO'&&r.estado==='Activo').length;
-    document.getElementById('badge-riesgos').textContent = riesgosAltos||RISKS.length;
+const AGENDA = [
+  {time:'0–5 min',title:'Apertura y validación de quórum',desc:'Verificar asistencia mínima de 5 miembros con voto'},
+  {time:'5–10 min',title:'Aprobación acta sesión #11',desc:'Revisión y firma del acta anterior'},
+  {time:'10–25 min',title:'Tablero ejecutivo: semáforo de proyectos',desc:'Dashboard de los 12 proyectos activos'},
+  {time:'25–45 min',title:'Revisión bloqueos: TI-018, TI-022, GDist-020',desc:'Proyectos en perfil C — decisión del comité'},
+  {time:'45–75 min',title:'Evaluación nuevas solicitudes: SOL-031, SOL-029',desc:'Votación con matriz de criticidad'},
+  {time:'75–85 min',title:'Ajuste de prioridades',desc:'Re-evaluación de solicitudes con cambio de contexto'},
+  {time:'85–90 min',title:'Acuerdos, responsables y cierre',desc:'Registro formal de decisiones y compromisos'},
+];
 
-    hideLoader();
-    renderDashboard();
-    renderSesion();
-    toast('Datos cargados desde Supabase','ok');
-  } catch(err){
-    hideLoader();
-    toast('Error conectando con Supabase: '+err.message,'err');
-    console.error(err);
-  }
-}
-
-// ===== GUARDAR EN SUPABASE =====
-async function dbSaveBacklog(item){
-  const {error} = await sb.from('backlog').upsert(item);
-  if(error) toast('Error al guardar: '+error.message,'err');
-  else { await loadAllData(); toast('Solicitud guardada en Supabase','ok'); }
-}
-async function dbSaveRisk(item){
-  const {error} = await sb.from('risks').insert(item);
-  if(error) toast('Error al guardar: '+error.message,'err');
-  else { await loadAllData(); toast('Riesgo registrado en Supabase','ok'); }
-}
-async function dbSaveAcuerdo(item){
-  const {error} = await sb.from('acuerdos').insert(item);
-  if(error) toast('Error al guardar: '+error.message,'err');
-  else { await loadAllData(); toast('Acuerdo guardado en Supabase','ok'); }
-}
-async function dbToggleCheck(id, completado){
-  const {error} = await sb.from('checklist_items').update({completado, updated_at: new Date()}).eq('id', id);
-  if(error) toast('Error: '+error.message,'err');
-  else await loadAllData();
-}
-async function dbSaveEvaluacion(item){
-  const {error} = await sb.from('evaluaciones').insert(item);
-  if(error) toast('Error al guardar: '+error.message,'err');
-  else toast('Evaluación guardada en Supabase','ok');
-}
+const CHECKLIST = [
+  {texto:'Exportar tickets activos GLPI con categoría Desarrollo / Cambio',resp:'Admin GLPI',plazo:'Día 1'},
+  {texto:'Revisar cada ticket con el técnico asignado y completar la Ficha de Incorporación',resp:'Secretario Ejecutivo + Gte. TI',plazo:'Días 2-4'},
+  {texto:'Identificar proyectos sin líder asignado, sin fecha de entrega o sin presupuesto',resp:'Secretario Ejecutivo',plazo:'Día 3'},
+  {texto:'Aplicar la Matriz de Criticidad CIPD a cada proyecto existente',resp:'Secretario Ejecutivo',plazo:'Días 4-5'},
+  {texto:'Clasificar cada proyecto en perfil A (control), B (riesgo), C (crítico) o D (revisar)',resp:'Secretario Ejecutivo',plazo:'Día 5'},
+  {texto:'Construir el tablero inicial del portafolio con todos los proyectos clasificados',resp:'Secretario Ejecutivo',plazo:'Días 6-7'},
+  {texto:'Preparar propuesta de líderes para proyectos sin responsable designado',resp:'Gte. TI + Gte. Planificación',plazo:'Día 7'},
+  {texto:'Definir fechas de entrega tentativas para proyectos que no las tienen',resp:'Gte. TI + Gerencias responsables',plazo:'Días 7-8'},
+  {texto:'Preparar agenda de sesión constitutiva con portafolio completo adjunto',resp:'Secretario Ejecutivo',plazo:'Día 9'},
+  {texto:'Enviar convocatoria formal a todos los miembros del Comité (48 h anticipación)',resp:'Secretario Ejecutivo',plazo:'Día 10'},
+  {texto:'Sesión constitutiva: ratificar portafolio, asignar líderes, aprobar backlog inicial',resp:'Todos los miembros CIPD',plazo:'Día 12-15'},
+];
+let checkState = CHECKLIST.map(()=>false);
 
 // ===== HELPERS =====
 function nivelBadge(n){
@@ -1062,24 +1324,10 @@ function calcScore(){
   bl.style.color=s>=5?color:'var(--gray4)';
 }
 function resetMatriz(){DIMS.forEach(d=>dimVals[d.id]=0);['mod-reg','mod-dep','mod-sin','mod-dup'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});renderDims();}
-async function guardarScore(){
+function guardarScore(){
   const s=parseInt(document.getElementById('score-num')?.textContent)||0;
   if(s<5){toast('Completa todas las dimensiones para guardar','warn');return;}
-  let nivel;
-  if(s>=21) nivel='CRÍTICO';
-  else if(s>=15) nivel='ALTO';
-  else if(s>=9) nivel='MEDIO';
-  else nivel='BAJO';
-  await dbSaveEvaluacion({
-    solicitud: 'SOL-'+(Math.floor(Math.random()*900)+100),
-    dim_op: dimVals.op, dim_com: dimVals.com, dim_reg: dimVals.reg,
-    dim_est: dimVals.est, dim_urg: dimVals.urg,
-    mod_reg: document.getElementById('mod-reg')?.checked||false,
-    mod_dep: document.getElementById('mod-dep')?.checked||false,
-    mod_sin: document.getElementById('mod-sin')?.checked||false,
-    mod_dup: document.getElementById('mod-dup')?.checked||false,
-    score_total: s, nivel
-  });
+  toast(`Score ${s} guardado en backlog`,'ok');
 }
 
 function renderKanban(){
@@ -1202,14 +1450,9 @@ function renderChecklist(){
   </div>`).join('');
   updateCheckStats();
 }
-async function toggleCheck(i){
+function toggleCheck(i){
   checkState[i]=!checkState[i];
-  const item = CHECKLIST[i];
-  if(item && item.id){
-    await dbToggleCheck(item.id, checkState[i]);
-  } else {
-    renderChecklist();
-  }
+  renderChecklist();
 }
 function updateCheckStats(){
   const done=checkState.filter(Boolean).length;
@@ -1326,7 +1569,19 @@ function toast(msg,type='ok'){
 }
 
 // ===== INIT =====
-loadAllData();
+renderDashboard();
+renderSesion();
+
+// ── Entry point ──────────────────────────────────────────────────────
+// Sobreescribe el init original para que la app espere autenticación
+window.addEventListener('DOMContentLoaded', () => {
+  // Ocultar la app hasta que auth confirme sesión
+  document.querySelector('.shell').style.visibility = 'hidden';
+  authInit().then(() => {
+    // renderDashboard y renderSesion ya están en el script original
+    // aquí nos aseguramos que corran después del login
+  });
+});
 </script>
 </body>
 </html>
