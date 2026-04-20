@@ -292,48 +292,6 @@ textarea{min-height:80px;resize:vertical;}
 
 
 <!-- ===== AUTH LAYER ===== -->
-<div id="auth-layer">
-  <div class="auth-card">
-    <div class="auth-logo">CIPD</div>
-    <div class="auth-sub">Secretaría Ejecutiva · Energía Honduras</div>
-
-    <!-- Config warning (shown when keys are placeholder) -->
-    <div class="config-banner" id="config-banner">
-      <strong>Configuración pendiente:</strong> Reemplaza las claves de Supabase en el código antes de usar el sistema.<br>
-      Busca <code>TU_URL_AQUI</code> y <code>TU_CLAVE_AQUI</code> en el archivo HTML.
-    </div>
-
-    <!-- Login form -->
-    <div id="view-login">
-      <div class="auth-title">Iniciar sesión</div>
-      <div class="auth-err" id="login-err"></div>
-      <div class="auth-field">
-        <label>Correo institucional</label>
-        <input type="email" id="login-email" placeholder="tucorreo@empresa.hn" autocomplete="email"/>
-      </div>
-      <div class="auth-field">
-        <label>Contraseña</label>
-        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
-      </div>
-      <button class="auth-btn" id="login-btn" onclick="doLogin()">Ingresar al sistema</button>
-      <div class="auth-link">¿Olvidaste tu contraseña? <span onclick="showReset()">Restablecer aquí</span></div>
-    </div>
-
-    <!-- Reset password form -->
-    <div id="view-reset">
-      <div class="auth-title">Restablecer contraseña</div>
-      <div class="auth-err" id="reset-err"></div>
-      <div class="auth-ok" id="reset-ok"></div>
-      <div class="auth-field">
-        <label>Correo institucional</label>
-        <input type="email" id="reset-email" placeholder="tucorreo@empresa.hn"/>
-      </div>
-      <button class="auth-btn" id="reset-btn" onclick="doReset()">Enviar enlace de restablecimiento</button>
-      <div class="auth-link"><span onclick="showLogin()">← Volver al inicio de sesión</span></div>
-    </div>
-  </div>
-</div>
-
 
 <div class="shell">
 
