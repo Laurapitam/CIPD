@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>CIPD — Secretaría Ejecutiva2</title>
+<title>CIPD — Secretaría Ejecutiva</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
-<!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
+
 :root {
   --navy: #0D1B2A;
   --navy2: #162436;
@@ -286,19 +286,58 @@ textarea{min-height:80px;resize:vertical;}
 #view-reset.show{display:block;}
 #view-login.hidden{display:none;}
 
+
 </style>
 </head>
 <body>
 
-<h1>hola mundo</h1>
 <!-- ===== AUTH LAYER ===== -->
+<div id="auth-layer">
+  <div class="auth-card">
+    <div class="auth-logo">CIPD</div>
+    <div class="auth-sub">Secretaría Ejecutiva · Energía Honduras</div>
 
-<!-- SIDEBAR -->
-<nav class="sidebar">
-  <div class="sidebar-brand">
-    <div class="brand-logo">CIPD</div>
-    <div class="brand-sub">Secretaría Ejecutiva</div>
+    <!-- Config warning (shown when keys are placeholder) -->
+    <div class="config-banner" id="config-banner">
+      <strong>Configuración pendiente:</strong> Reemplaza las claves de Supabase en el código antes de usar el sistema.<br>
+      Busca <code>TU_URL_AQUI</code> y <code>TU_CLAVE_AQUI</code> en el archivo HTML.
+    </div>
+
+    <!-- Login form -->
+    <div id="view-login">
+      <div class="auth-title">Iniciar sesión</div>
+      <div class="auth-err" id="login-err"></div>
+      <div class="auth-field">
+        <label>Correo institucional</label>
+        <input type="email" id="login-email" placeholder="tucorreo@empresa.hn" autocomplete="email"/>
+      </div>
+      <div class="auth-field">
+        <label>Contraseña</label>
+        <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <button class="auth-btn" id="login-btn" onclick="doLogin()">Ingresar al sistema</button>
+      <div class="auth-link">¿Olvidaste tu contraseña? <span onclick="showReset()">Restablecer aquí</span></div>
+    </div>
+
+    <!-- Reset password form -->
+    <div id="view-reset">
+      <div class="auth-title">Restablecer contraseña</div>
+      <div class="auth-err" id="reset-err"></div>
+      <div class="auth-ok" id="reset-ok"></div>
+      <div class="auth-field">
+        <label>Correo institucional</label>
+        <input type="email" id="reset-email" placeholder="tucorreo@empresa.hn"/>
+      </div>
+      <button class="auth-btn" id="reset-btn" onclick="doReset()">Enviar enlace de restablecimiento</button>
+      <div class="auth-link"><span onclick="showLogin()">← Volver al inicio de sesión</span></div>
+    </div>
   </div>
+</div>
+
+
+<div class="shell" style="visibility:hidden;" id="app-shell">
+<nav class="sidebar">
+  <div class="sidebar-brand"><div class="brand-logo">CIPD</div><div class="brand-sub">Secretaría Ejecutiva</div></div>
   <div class="sidebar-section">Principal</div>
   <div class="nav-item active" onclick="nav('dashboard',this)">
     <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
@@ -307,7 +346,7 @@ textarea{min-height:80px;resize:vertical;}
   <div class="nav-item" onclick="nav('backlog',this)">
     <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h8M2 12h10"/></svg>
     Backlog
-    <span class="sidebar-badge" id="badge-backlog">8</span>
+    <span class="sidebar-badge" id="badge-backlog">—</span>
   </div>
   <div class="nav-item" onclick="nav('matriz',this)">
     <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1L1 5v6l7 4 7-4V5L8 1z"/></svg>
@@ -321,14 +360,14 @@ textarea{min-height:80px;resize:vertical;}
   <div class="nav-item" onclick="nav('riesgos',this)">
     <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2L1.5 13.5h13L8 2z"/><path d="M8 7v3M8 11.5v.5"/></svg>
     Riesgos
-    <span class="sidebar-badge" id="badge-riesgos">3</span>
+    <span class="sidebar-badge" id="badge-riesgos">—</span>
   </div>
   <div class="nav-item" onclick="nav('sesion',this)">
     <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1.5" y="2.5" width="13" height="12" rx="2"/><path d="M1.5 6.5h13M5 1v3M11 1v3"/></svg>
     Sesiones & Actas
   </div>
   <div class="nav-item" onclick="nav('glpi',this)">
-    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="11" rx="1.5"/><path d="M5 3V1.5M11 3V1.5M1 7h14"/></svg>
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="11" rx="1.5"/><path d="M1 7h14"/></svg>
     Integración GLPI
   </div>
   <div class="sidebar-section">Reportes</div>
@@ -341,14 +380,9 @@ textarea{min-height:80px;resize:vertical;}
     Lista de Verificación
   </div>
 </nav>
-
-<!-- MAIN -->
 <div class="main">
   <div class="topbar">
-    <div>
-      <div class="topbar-title" id="topbar-title">Dashboard General</div>
-      <div class="topbar-sub" id="topbar-sub">CIPD — Sesión #12 activa · 14 abr 2025</div>
-    </div>
+    <div><div class="topbar-title" id="topbar-title">Dashboard General</div><div class="topbar-sub" id="topbar-sub">CIPD — Cargando datos...</div></div>
     <div class="topbar-actions">
       <button class="btn btn-outline btn-sm" onclick="openModal('nueva-solicitud')">+ Nueva solicitud</button>
       <button class="btn btn-primary btn-sm" onclick="openModal('nueva-sesion')">Convocar sesión</button>
@@ -358,514 +392,157 @@ textarea{min-height:80px;resize:vertical;}
       </div>
     </div>
   </div>
-
   <div class="content">
 
-    <!-- ===== DASHBOARD ===== -->
-    <div id="page-dashboard" class="page active">
-      <div class="metric-row">
-        <div class="metric">
-          <div class="metric-accent" style="background:var(--blue)"></div>
-          <div class="metric-label">Proyectos activos</div>
-          <div class="metric-value">12</div>
-          <div class="metric-sub"><span class="metric-down">3 en riesgo</span> · 5 en marcha</div>
-        </div>
-        <div class="metric">
-          <div class="metric-accent" style="background:var(--orange)"></div>
-          <div class="metric-label">Backlog pendiente</div>
-          <div class="metric-value">8</div>
-          <div class="metric-sub"><span class="metric-down">2 críticos</span> sin asignar</div>
-        </div>
-        <div class="metric">
-          <div class="metric-accent" style="background:var(--green)"></div>
-          <div class="metric-label">Entrega a tiempo</div>
-          <div class="metric-value" style="color:var(--green)">83%</div>
-          <div class="metric-sub"><span class="metric-up">↑ 5%</span> vs trimestre ant.</div>
-        </div>
-        <div class="metric">
-          <div class="metric-accent" style="background:var(--teal)"></div>
-          <div class="metric-label">Acuerdos cumplidos</div>
-          <div class="metric-value" style="color:var(--teal)">91%</div>
-          <div class="metric-sub">Meta: ≥ 90% <span class="metric-up">✓</span></div>
+
+
+<div id="page-dashboard" class="page active">
+  <div class="metric-row">
+    <div class="metric" id="m-activos"><div class="metric-accent" style="background:var(--blue)"></div><div class="metric-label">Proyectos activos</div><div class="metric-value">—</div><div class="metric-sub">cargando...</div></div>
+    <div class="metric" id="m-backlog"><div class="metric-accent" style="background:var(--orange)"></div><div class="metric-label">Backlog pendiente</div><div class="metric-value">—</div><div class="metric-sub">cargando...</div></div>
+    <div class="metric" id="m-entrega"><div class="metric-accent" style="background:var(--green)"></div><div class="metric-label">Entrega a tiempo</div><div class="metric-value">—</div><div class="metric-sub">Meta ≥ 80%</div></div>
+    <div class="metric"><div class="metric-accent" style="background:var(--teal)"></div><div class="metric-label">Sistema</div><div class="metric-value" style="font-size:16px;color:var(--teal);">En línea</div><div class="metric-sub">Datos en tiempo real</div></div>
+  </div>
+  <div class="col-7-5">
+    <div class="card"><div class="card-header"><span class="card-title">Semáforo de proyectos activos</span><button class="btn btn-outline btn-sm" onclick="nav('proyectos',null)">Ver todos</button></div><div class="tbl-wrap"><table><thead><tr><th></th><th>Proyecto</th><th>Gerencia</th><th>Avance</th><th>Entrega</th></tr></thead><tbody id="tbl-semaforo"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--gray4);">Cargando...</td></tr></tbody></table></div></div>
+    <div>
+      <div class="card section-gap"><div class="card-header"><span class="card-title">Distribución portafolio</span></div><div id="dist-portafolio" style="font-size:13px;color:var(--gray4);padding:8px 0;">Cargando...</div></div>
+      <div class="card"><div class="card-header"><span class="card-title">Escalamientos pendientes</span></div><div id="escalamientos" style="font-size:13px;color:var(--gray4);padding:8px 0;">Calculando...</div></div>
+    </div>
+  </div>
+  <div class="card"><div class="card-header"><span class="card-title">Top backlog por criticidad</span><button class="btn btn-outline btn-sm" onclick="nav('backlog',null)">Ver completo</button></div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Solicitud</th><th>Gerencia</th><th>GLPI</th><th>Score</th><th>Nivel</th><th>Estado</th></tr></thead><tbody id="tbl-backlog-mini"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--gray4);">Cargando...</td></tr></tbody></table></div></div>
+</div>
+
+<div id="page-backlog" class="page">
+  <div class="page-title">Backlog de solicitudes</div>
+  <div class="page-desc">Iniciativas registradas pendientes de evaluación o ejecución.</div>
+  <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
+    <select id="filter-nivel" style="width:160px;" onchange="renderBacklog()"><option value="">Todos los niveles</option><option value="CRÍTICO">Crítico</option><option value="ALTO">Alto</option><option value="MEDIO">Medio</option><option value="BAJO">Bajo</option></select>
+    <select id="filter-estado" style="width:180px;" onchange="renderBacklog()"><option value="">Todos los estados</option><option value="en_evaluacion">En evaluación</option><option value="aprobado">Aprobado</option><option value="pendiente">Pendiente</option><option value="rechazado">Rechazado</option></select>
+    <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="openModal('nueva-solicitud')">+ Nueva solicitud</button>
+  </div>
+  <div class="card" style="padding:0;"><div class="tbl-wrap"><table><thead><tr><th>ID CIPD</th><th>GLPI</th><th>Iniciativa</th><th>Gerencia</th><th>Score</th><th>Nivel</th><th>Estado</th><th>Ingreso</th><th></th></tr></thead><tbody id="tbl-backlog"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--gray4);">Cargando...</td></tr></tbody></table></div></div>
+</div>
+
+<div id="page-matriz" class="page">
+  <div class="page-title">Matriz de Criticidad</div>
+  <div class="page-desc">Evalúa cada iniciativa con las 5 dimensiones del CIPD.</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Calculadora de score</span></div>
+      <div id="dim-container"><div style="padding:20px;text-align:center;color:var(--gray4);">Cargando...</div></div>
+      <div style="border-top:1px solid var(--gray2);margin-top:4px;padding-top:16px;">
+        <div class="score-display"><div class="score-num" id="score-num" style="color:var(--gray3)">0</div><div class="score-desc">Score total (máx. 25)</div><div class="score-nivel" id="score-nivel-badge">—</div></div>
+        <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+          <label style="flex:1;min-width:180px;display:flex;align-items:center;gap:8px;font-size:12px;"><input type="checkbox" id="mod-reg" onchange="calcScore()" style="width:auto;padding:0;"/> Mandato regulatorio CREE (+2)</label>
+          <label style="flex:1;min-width:180px;display:flex;align-items:center;gap:8px;font-size:12px;"><input type="checkbox" id="mod-dep" onchange="calcScore()" style="width:auto;padding:0;"/> Dependencia técnica activa (+1)</label>
+          <label style="flex:1;min-width:180px;display:flex;align-items:center;gap:8px;font-size:12px;"><input type="checkbox" id="mod-sin" onchange="calcScore()" style="width:auto;padding:0;"/> Sin recursos &lt;60 días (−1)</label>
+          <label style="flex:1;min-width:180px;display:flex;align-items:center;gap:8px;font-size:12px;"><input type="checkbox" id="mod-dup" onchange="calcScore()" style="width:auto;padding:0;"/> Iniciativa duplicada (−2)</label>
         </div>
       </div>
-
-      <div class="col-7-5">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Semáforo de proyectos activos</span>
-            <button class="btn btn-outline btn-sm" onclick="nav('proyectos',null)">Ver todos</button>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th></th><th>Proyecto</th><th>Gerencia</th><th>Avance</th><th>Entrega</th></tr></thead>
-              <tbody id="tbl-semaforo"></tbody>
-            </table>
-          </div>
-        </div>
-        <div>
-          <div class="card section-gap">
-            <div class="card-header">
-              <span class="card-title">Distribución portafolio</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-              <div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;">En marcha (verde)</span><span style="font-size:12px;font-weight:600;color:var(--green)">5</span></div>
-                <div class="prog-wrap"><div class="prog-fill prog-green" style="width:42%"></div></div>
-              </div>
-              <div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;">En riesgo (amarillo)</span><span style="font-size:12px;font-weight:600;color:var(--amber)">4</span></div>
-                <div class="prog-wrap"><div class="prog-fill prog-yellow" style="width:33%"></div></div>
-              </div>
-              <div>
-                <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:12px;">Crítico (rojo)</span><span style="font-size:12px;font-weight:600;color:var(--red)">3</span></div>
-                <div class="prog-wrap"><div class="prog-fill prog-red" style="width:25%"></div></div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><span class="card-title">Escalamientos pendientes</span></div>
-            <div style="font-size:13px;">
-              <div class="alert alert-danger">
-                <div>
-                  <div style="font-weight:600;">Presupuesto adicional subestaciones</div>
-                  <div style="font-size:12px;margin-top:2px;">USD 85,000 — supera umbral del Comité</div>
-                </div>
-              </div>
-              <div class="alert alert-warn">
-                <div>
-                  <div style="font-weight:600;">Conflicto prioridad GCom vs GDist</div>
-                  <div style="font-size:12px;margin-top:2px;">Sin resolver desde sesión #11</div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn btn-outline btn-sm" onclick="resetMatriz()">Limpiar</button><button class="btn btn-primary btn-sm" style="flex:1;" onclick="guardarScore()">Guardar en backlog</button></div>
+    </div>
+    <div>
+      <div class="card section-gap">
+        <div class="card-header"><span class="card-title">Tabla de referencia</span></div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--red-pale);"><span style="font-weight:700;color:#C0123A;min-width:80px;">21–25</span><div><div style="font-weight:600;color:#C0123A;font-size:12px;">CRÍTICO</div><div style="font-size:11px;color:#C0123A;">Agenda inmediata. Próxima sesión obligatoria.</div></div></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--amber-pale);"><span style="font-weight:700;color:#9A5500;min-width:80px;">15–20</span><div><div style="font-weight:600;color:#9A5500;font-size:12px;">ALTO</div><div style="font-size:11px;color:#9A5500;">Sprint actual. Asignar líder de proyecto.</div></div></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:#FFF9E0;"><span style="font-weight:700;color:#7A6200;min-width:80px;">9–14</span><div><div style="font-weight:600;color:#7A6200;font-size:12px;">MEDIO</div><div style="font-size:11px;color:#7A6200;">Planificar próximo trimestre.</div></div></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--green-pale);"><span style="font-weight:700;color:#006B52;min-width:80px;">5–8</span><div><div style="font-weight:600;color:#006B52;font-size:12px;">BAJO</div><div style="font-size:11px;color:#006B52;">Backlog. Revisión trimestral.</div></div></div>
         </div>
       </div>
+      <div class="card"><div class="card-header"><span class="card-title">Últimas evaluaciones</span></div><div class="tbl-wrap"><table><thead><tr><th>Solicitud</th><th>Score</th><th>Nivel</th></tr></thead><tbody id="tbl-ultimas-eval"><tr><td colspan="3" style="text-align:center;padding:20px;color:var(--gray4);">Sin evaluaciones aún</td></tr></tbody></table></div></div>
+    </div>
+  </div>
+</div>
 
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Top 5 backlog por criticidad</span>
-          <button class="btn btn-outline btn-sm" onclick="nav('backlog',null)">Ver backlog completo</button>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>#</th><th>Solicitud</th><th>Gerencia</th><th>ID GLPI</th><th>Score</th><th>Nivel</th><th>Estado</th></tr></thead>
-            <tbody id="tbl-backlog-mini"></tbody>
-          </table>
-        </div>
+<div id="page-proyectos" class="page">
+  <div class="page-title">Proyectos Activos</div>
+  <div class="page-desc">Seguimiento del portafolio en ejecución.</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div class="tab-group"><button class="tab-btn active" onclick="switchTab('kanban',this)">Kanban</button><button class="tab-btn" onclick="switchTab('tabla-proy',this)">Tabla</button></div>
+    <button class="btn btn-primary btn-sm" onclick="openModal('ficha-incorporacion')">+ Incorporar proyecto GLPI</button>
+  </div>
+  <div id="view-kanban"><div class="kanban" id="kanban-board"><div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray4);">Cargando...</div></div></div>
+  <div id="view-tabla-proy" style="display:none;"><div class="card" style="padding:0;"><div class="tbl-wrap"><table><thead><tr><th>ID</th><th>Proyecto</th><th>Líder</th><th>Gerencia</th><th>Perfil</th><th>Avance</th><th>Entrega</th><th>Estado</th><th></th></tr></thead><tbody id="tbl-proyectos"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--gray4);">Cargando...</td></tr></tbody></table></div></div></div>
+</div>
+
+<div id="page-riesgos" class="page">
+  <div class="page-title">Gestión de Riesgos</div>
+  <div class="page-desc">Mapa de riesgos activos del portafolio.</div>
+  <div class="two-col">
+    <div class="card"><div class="card-header"><span class="card-title">Registro de riesgos</span><button class="btn btn-primary btn-sm" onclick="openModal('nuevo-riesgo')">+ Agregar</button></div><div class="tbl-wrap"><table><thead><tr><th>Riesgo</th><th>Proyecto</th><th>P</th><th>I</th><th>Nivel</th><th>Estado</th></tr></thead><tbody id="tbl-riesgos"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--gray4);">Cargando...</td></tr></tbody></table></div></div>
+    <div class="card"><div class="card-header"><span class="card-title">Mapa de calor</span></div><div id="heat-map-container"><div style="padding:20px;color:var(--gray4);font-size:13px;">Cargando...</div></div><div style="margin-top:12px;font-size:11px;color:var(--gray4);">P = Probabilidad (filas, 5=alta) · I = Impacto (columnas, 5=máximo)</div></div>
+  </div>
+</div>
+
+<div id="page-sesion" class="page">
+  <div class="page-title">Sesiones & Actas</div>
+  <div class="page-desc">Gestión de agenda, quórum, acuerdos y registro de sesiones.</div>
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Sesión más reciente</span><span class="badge badge-blue" id="sesion-tipo-badge">—</span></div>
+      <div id="agenda-list"><div style="padding:20px;color:var(--gray4);font-size:13px;">Cargando...</div></div>
+      <div style="display:flex;gap:10px;margin-top:16px;"><button class="btn btn-outline btn-sm" onclick="openModal('nueva-sesion')">Nueva sesión</button><button class="btn btn-primary btn-sm" onclick="toast('Convocatoria enviada a todos los miembros','ok')">Enviar convocatoria</button></div>
+    </div>
+    <div class="card"><div class="card-header"><span class="card-title">Acuerdos pendientes</span><button class="btn btn-primary btn-sm" onclick="openModal('nuevo-acuerdo')">+ Acuerdo</button></div><div class="tbl-wrap"><table><thead><tr><th>#</th><th>Acuerdo</th><th>Responsable</th><th>Fecha</th><th>Estado</th></tr></thead><tbody id="tbl-acuerdos"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--gray4);">Cargando...</td></tr></tbody></table></div></div>
+  </div>
+  <div class="card" style="margin-top:20px;">
+    <div class="card-header"><span class="card-title">Historial de sesiones</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Sesión</th><th>Tipo</th><th>Fecha</th><th>Miembros</th><th>Quórum</th><th>Acta</th></tr></thead><tbody><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--gray4);">Cargando...</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<div id="page-glpi" class="page">
+  <div class="page-title">Integración GLPI</div>
+  <div class="page-desc">Tickets GLPI vinculados al CIPD. Perfil de proyectos en ejecución.</div>
+  <div class="alert alert-info" style="margin-bottom:20px;"><div><strong>Criterio de escalamiento:</strong> Tickets con duración &gt;30 días, impacto multi-área, presupuesto &gt;USD 5,000 o sistema crítico deben incorporarse al CIPD.</div></div>
+  <div class="card">
+    <div class="card-header"><span class="card-title">Proyectos vinculados a GLPI</span><div style="display:flex;gap:8px;"><select style="width:140px;font-size:12px;padding:5px 8px;" onchange="renderGLPI(this.value)"><option value="">Todos los perfiles</option><option value="A">Perfil A</option><option value="B">Perfil B</option><option value="C">Perfil C</option><option value="D">Perfil D</option></select><button class="btn btn-primary btn-sm" onclick="openModal('ficha-incorporacion')">+ Ficha de incorporación</button></div></div>
+    <div class="tbl-wrap"><table><thead><tr><th>ID GLPI</th><th>ID CIPD</th><th>Nombre</th><th>Gerencia</th><th>Perfil</th><th>Avance</th><th>Bloqueo</th><th>Estado</th><th></th></tr></thead><tbody id="tbl-glpi"><tr><td colspan="9" style="text-align:center;padding:24px;color:var(--gray4);">Cargando...</td></tr></tbody></table></div>
+  </div>
+</div>
+
+<div id="page-informe" class="page">
+  <div class="page-title">Informe Ejecutivo</div>
+  <div class="page-desc">Informe quincenal generado automáticamente desde los datos reales del sistema.</div>
+  <div class="two-col">
+    <div>
+      <div class="card section-gap">
+        <div class="card-header"><span class="card-title">Informe generado</span></div>
+        <div class="informe-preview" id="informe-preview"><div style="color:var(--gray4);">Generando informe...</div></div>
+        <div style="display:flex;gap:10px;margin-top:14px;"><button class="btn btn-outline btn-sm" onclick="window.print()">Imprimir / PDF</button><button class="btn btn-primary" onclick="toast('Informe enviado a Gerencia General','ok')">Enviar a Gerencia General ↗</button></div>
       </div>
     </div>
-
-    <!-- ===== BACKLOG ===== -->
-    <div id="page-backlog" class="page">
-      <div class="page-title">Backlog de solicitudes</div>
-      <div class="page-desc">Iniciativas registradas pendientes de evaluación o ejecución.</div>
-      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center;">
-        <select id="filter-nivel" style="width:160px;" onchange="renderBacklog()">
-          <option value="">Todos los niveles</option>
-          <option value="CRÍTICO">Crítico</option>
-          <option value="ALTO">Alto</option>
-          <option value="MEDIO">Medio</option>
-          <option value="BAJO">Bajo</option>
-        </select>
-        <select id="filter-estado" style="width:180px;" onchange="renderBacklog()">
-          <option value="">Todos los estados</option>
-          <option value="En evaluación">En evaluación</option>
-          <option value="Aprobado">Aprobado</option>
-          <option value="Pendiente">Pendiente</option>
-          <option value="Rechazado">Rechazado</option>
-        </select>
-        <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="openModal('nueva-solicitud')">+ Nueva solicitud</button>
-      </div>
-      <div class="card" style="padding:0;">
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>ID CIPD</th><th>ID GLPI</th><th>Iniciativa</th><th>Gerencia</th><th>Score</th><th>Nivel</th><th>Estado</th><th>Ingreso</th><th>Acciones</th></tr></thead>
-            <tbody id="tbl-backlog"></tbody>
-          </table>
-        </div>
-      </div>
+    <div>
+      <div class="card section-gap"><div class="card-header"><span class="card-title">KPIs del Comité</span></div><div id="kpis-bars" style="display:flex;flex-direction:column;gap:14px;"><div style="color:var(--gray4);font-size:13px;">Calculando...</div></div></div>
     </div>
+  </div>
+</div>
 
-    <!-- ===== MATRIZ ===== -->
-    <div id="page-matriz" class="page">
-      <div class="page-title">Matriz de Criticidad</div>
-      <div class="page-desc">Evalúa cada iniciativa con las 5 dimensiones del CIPD para calcular su prioridad.</div>
-      <div class="two-col">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Calculadora de score</span></div>
-          <div id="dim-container"></div>
-          <div style="border-top:1px solid var(--gray2);margin-top:4px;padding-top:16px;">
-            <div class="score-display">
-              <div class="score-num" id="score-num" style="color:var(--gray3)">0</div>
-              <div class="score-desc">Score total (máx. 25)</div>
-              <div class="score-nivel" id="score-nivel-badge">— Sin evaluar</div>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:12px;">
-              <label style="flex:1;display:flex;align-items:center;gap:8px;">
-                <span style="font-size:12px;">Modificador regulatorio (+2)</span>
-                <input type="checkbox" id="mod-reg" onchange="calcScore()" style="width:auto;padding:0;"/>
-              </label>
-              <label style="flex:1;display:flex;align-items:center;gap:8px;">
-                <span style="font-size:12px;">Dependencia técnica (+1)</span>
-                <input type="checkbox" id="mod-dep" onchange="calcScore()" style="width:auto;padding:0;"/>
-              </label>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:8px;">
-              <label style="flex:1;display:flex;align-items:center;gap:8px;">
-                <span style="font-size:12px;">Sin recursos -60 días (−1)</span>
-                <input type="checkbox" id="mod-sin" onchange="calcScore()" style="width:auto;padding:0;"/>
-              </label>
-              <label style="flex:1;display:flex;align-items:center;gap:8px;">
-                <span style="font-size:12px;">Iniciativa duplicada (−2)</span>
-                <input type="checkbox" id="mod-dup" onchange="calcScore()" style="width:auto;padding:0;"/>
-              </label>
-            </div>
-          </div>
-          <div style="display:flex;gap:10px;margin-top:16px;">
-            <button class="btn btn-outline btn-sm" onclick="resetMatriz()">Limpiar</button>
-            <button class="btn btn-primary btn-sm" style="flex:1;" onclick="guardarScore()">Guardar en backlog</button>
-          </div>
-        </div>
-        <div>
-          <div class="card section-gap">
-            <div class="card-header"><span class="card-title">Tabla de referencia</span></div>
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--red-pale);">
-                <span style="font-weight:700;color:#C0123A;min-width:80px;">21–25</span>
-                <div><div style="font-weight:600;color:#C0123A;font-size:12px;">CRÍTICO</div><div style="font-size:11px;color:#C0123A;">Agenda inmediata. Próxima sesión obligatoria.</div></div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--amber-pale);">
-                <span style="font-weight:700;color:#9A5500;min-width:80px;">15–20</span>
-                <div><div style="font-weight:600;color:#9A5500;font-size:12px;">ALTO</div><div style="font-size:11px;color:#9A5500;">Sprint actual. Asignar líder de proyecto.</div></div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:#FFF9E0;">
-                <span style="font-weight:700;color:#7A6200;min-width:80px;">9–14</span>
-                <div><div style="font-weight:600;color:#7A6200;font-size:12px;">MEDIO</div><div style="font-size:11px;color:#7A6200;">Planificar próximo trimestre.</div></div>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;background:var(--green-pale);">
-                <span style="font-weight:700;color:#006B52;min-width:80px;">5–8</span>
-                <div><div style="font-weight:600;color:#006B52;font-size:12px;">BAJO</div><div style="font-size:11px;color:#006B52;">Backlog. Revisión trimestral.</div></div>
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><span class="card-title">Últimas evaluaciones</span></div>
-            <div class="tbl-wrap">
-              <table>
-                <thead><tr><th>Solicitud</th><th>Score</th><th>Nivel</th></tr></thead>
-                <tbody id="tbl-ultimas-eval"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<div id="page-checklist" class="page">
+  <div class="page-title">Lista de verificación constitutiva</div>
+  <div class="page-desc">Acciones previas a la sesión constitutiva del CIPD.</div>
+  <div class="metric-row">
+    <div class="metric"><div class="metric-accent" style="background:var(--blue)"></div><div class="metric-label">Completadas</div><div class="metric-value" id="check-done" style="color:var(--green)">0</div></div>
+    <div class="metric"><div class="metric-accent" style="background:var(--gray3)"></div><div class="metric-label">Pendientes</div><div class="metric-value" id="check-pending" style="color:var(--amber)">11</div></div>
+    <div class="metric"><div class="metric-accent" style="background:var(--teal)"></div><div class="metric-label">Progreso</div><div class="metric-value" id="check-pct" style="color:var(--teal)">0%</div></div>
+    <div class="metric"><div class="metric-accent" style="background:var(--orange)"></div><div class="metric-label">Pasos totales</div><div class="metric-value">11</div></div>
+  </div>
+  <div class="card" style="margin-bottom:20px;"><div class="prog-wrap" style="height:10px;border-radius:6px;"><div class="prog-fill" id="check-bar" style="width:0%;height:10px;border-radius:6px;"></div></div></div>
+  <div class="card"><div id="checklist-items"></div></div>
+</div>
 
-    <!-- ===== PROYECTOS ===== -->
-    <div id="page-proyectos" class="page">
-      <div class="page-title">Proyectos Activos</div>
-      <div class="page-desc">Seguimiento del portafolio en ejecución.</div>
-      <div class="tab-group">
-        <button class="tab-btn active" onclick="switchTab('kanban',this)">Kanban</button>
-        <button class="tab-btn" onclick="switchTab('tabla-proy',this)">Tabla</button>
-      </div>
-      <div id="view-kanban">
-        <div class="kanban" id="kanban-board"></div>
-      </div>
-      <div id="view-tabla-proy" style="display:none;">
-        <div class="card" style="padding:0;">
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>ID</th><th>Proyecto</th><th>Líder</th><th>Gerencia</th><th>Perfil</th><th>Avance</th><th>Entrega</th><th>Estado</th><th>Acc.</th></tr></thead>
-              <tbody id="tbl-proyectos"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== RIESGOS ===== -->
-    <div id="page-riesgos" class="page">
-      <div class="page-title">Gestión de Riesgos</div>
-      <div class="page-desc">Mapa de riesgos activos del portafolio.</div>
-      <div class="two-col">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Registro de riesgos</span>
-            <button class="btn btn-primary btn-sm" onclick="openModal('nuevo-riesgo')">+ Agregar</button>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>Riesgo</th><th>Proyecto</th><th>P</th><th>I</th><th>Nivel</th><th>Estado</th></tr></thead>
-              <tbody id="tbl-riesgos"></tbody>
-            </table>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">Mapa de calor</span></div>
-          <div id="heat-map-container"></div>
-          <div style="margin-top:12px;font-size:11px;color:var(--gray4);">P = Probabilidad (filas, 5=alta) · I = Impacto (columnas, 5=máximo)</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== SESION ===== -->
-    <div id="page-sesion" class="page">
-      <div class="page-title">Sesiones & Actas</div>
-      <div class="page-desc">Gestión de la agenda, quórum, acuerdos y registro de sesiones.</div>
-      <div class="two-col">
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Sesión #12 — 19 Mar 2025</span>
-            <span class="badge badge-blue">Ordinaria</span>
-          </div>
-          <div class="alert alert-info" style="font-size:12px;">Quórum confirmado: 7 de 9 miembros. Sesión válida. ✓</div>
-          <div id="agenda-list"></div>
-          <div style="display:flex;gap:10px;margin-top:16px;">
-            <button class="btn btn-outline btn-sm" onclick="openModal('nueva-sesion')">Nueva sesión</button>
-            <button class="btn btn-primary btn-sm" onclick="toast('Convocatoria enviada a todos los miembros','ok')">Enviar convocatoria</button>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header">
-            <span class="card-title">Acuerdos de sesión</span>
-            <button class="btn btn-primary btn-sm" onclick="openModal('nuevo-acuerdo')">+ Acuerdo</button>
-          </div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>#</th><th>Acuerdo</th><th>Resp.</th><th>Fecha</th><th>Estado</th></tr></thead>
-              <tbody id="tbl-acuerdos"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="card" style="margin-top:20px;">
-        <div class="card-header"><span class="card-title">Historial de sesiones</span></div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>Sesión</th><th>Tipo</th><th>Fecha</th><th>Proyectos revisados</th><th>Acuerdos</th><th>Asistencia</th><th>Acta</th></tr></thead>
-            <tbody>
-              <tr><td class="td-bold">#11</td><td><span class="badge badge-blue">Ordinaria</span></td><td>05 Mar 2025</td><td>10</td><td>6</td><td>8/9</td><td><button class="btn btn-outline btn-sm" onclick="toast('Abriendo acta #11','ok')">Ver acta</button></td></tr>
-              <tr><td class="td-bold">#10</td><td><span class="badge badge-blue">Ordinaria</span></td><td>19 Feb 2025</td><td>9</td><td>5</td><td>9/9</td><td><button class="btn btn-outline btn-sm" onclick="toast('Abriendo acta #10','ok')">Ver acta</button></td></tr>
-              <tr><td class="td-bold">#9</td><td><span class="badge badge-teal">Estratégica</span></td><td>05 Feb 2025</td><td>14</td><td>9</td><td>9/9</td><td><button class="btn btn-outline btn-sm" onclick="toast('Abriendo acta #9','ok')">Ver acta</button></td></tr>
-              <tr><td class="td-bold">#8</td><td><span class="badge badge-blue">Ordinaria</span></td><td>22 Ene 2025</td><td>8</td><td>4</td><td>7/9</td><td><button class="btn btn-outline btn-sm" onclick="toast('Abriendo acta #8','ok')">Ver acta</button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== GLPI ===== -->
-    <div id="page-glpi" class="page">
-      <div class="page-title">Integración GLPI</div>
-      <div class="page-desc">Gestión de tickets GLPI vinculados al CIPD. Perfil de proyectos en ejecución.</div>
-
-      <div class="alert alert-info" style="margin-bottom:20px;">
-        <div><strong>Regla de escalamiento:</strong> Tickets con duración &gt;30 días, impacto multi-área, presupuesto &gt;USD 5,000 o sistema crítico deben escalarse automáticamente al CIPD.</div>
-      </div>
-
-      <div class="metric-row">
-        <div class="metric">
-          <div class="metric-accent" style="background:var(--green)"></div>
-          <div class="metric-label">Perfil A — En control</div>
-          <div class="metric-value" style="color:var(--green)">5</div>
-          <div class="metric-sub">Avance normal, sin bloqueos</div>
-        </div>
-        <div class="metric">
-          <div class="metric-accent" style="background:var(--amber)"></div>
-          <div class="metric-label">Perfil B — Con riesgo</div>
-          <div class="metric-value" style="color:var(--amber)">4</div>
-          <div class="metric-sub">Plan de recuperación activo</div>
-        </div>
-        <div class="metric">
-          <div class="metric-accent" style="background:var(--red)"></div>
-          <div class="metric-label">Perfil C — Crítico</div>
-          <div class="metric-value" style="color:var(--red)">3</div>
-          <div class="metric-sub">Intervención del Comité</div>
-        </div>
-        <div class="metric">
-          <div class="metric-accent" style="background:var(--gray3)"></div>
-          <div class="metric-label">Perfil D — A revisar</div>
-          <div class="metric-value" style="color:var(--gray4)">2</div>
-          <div class="metric-sub">Pausados o sin actividad</div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <span class="card-title">Tickets GLPI vinculados al CIPD</span>
-          <div style="display:flex;gap:8px;">
-            <select style="width:140px;font-size:12px;padding:5px 8px;" onchange="renderGLPI(this.value)">
-              <option value="">Todos los perfiles</option>
-              <option value="A">Perfil A</option>
-              <option value="B">Perfil B</option>
-              <option value="C">Perfil C</option>
-              <option value="D">Perfil D</option>
-            </select>
-            <button class="btn btn-primary btn-sm" onclick="openModal('ficha-incorporacion')">+ Ficha de incorporación</button>
-          </div>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>ID GLPI</th><th>ID CIPD</th><th>Nombre del proyecto</th><th>Gerencia</th><th>Perfil</th><th>Avance</th><th>Bloqueo</th><th>Decisión CIPD</th><th>Acc.</th></tr></thead>
-            <tbody id="tbl-glpi"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="two-col" style="margin-top:20px;">
-        <div class="card">
-          <div class="card-header"><span class="card-title">Flujo GLPI → CIPD</span></div>
-          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;">
-            <div style="display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:8px;background:var(--gray1);">
-              <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">1</div>
-              <div><div style="font-weight:600;">Usuario ingresa ticket en GLPI</div><div style="font-size:12px;color:var(--gray4);">Admin GLPI aplica categoría Desarrollo/Proyecto</div></div>
-            </div>
-            <div style="display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:8px;background:var(--gray1);">
-              <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">2</div>
-              <div><div style="font-weight:600;">Verificar criterios de escalamiento</div><div style="font-size:12px;color:var(--gray4);">&gt;30 días · multi-área · &gt;USD 5K · sistema crítico</div></div>
-            </div>
-            <div style="display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:8px;background:var(--gray1);">
-              <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">3</div>
-              <div><div style="font-weight:600;">Secretaría completa Ficha de Incorporación</div><div style="font-size:12px;color:var(--gray4);">ID GLPI + 12 campos de la ficha CIPD</div></div>
-            </div>
-            <div style="display:flex;gap:12px;align-items:flex-start;padding:10px;border-radius:8px;background:var(--gray1);">
-              <div style="width:24px;height:24px;border-radius:50%;background:var(--blue);color:var(--white);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">4</div>
-              <div><div style="font-weight:600;">Comité evalúa y decide en sesión</div><div style="font-size:12px;color:var(--gray4);">Aprobado / Rechazado / Aplazado → notificación a GLPI</div></div>
-            </div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-header"><span class="card-title">Tickets pendientes de decisión CIPD</span></div>
-          <div class="tbl-wrap">
-            <table>
-              <thead><tr><th>ID GLPI</th><th>Solicitud</th><th>Días en espera</th><th>Acc.</th></tr></thead>
-              <tbody>
-                <tr><td class="td-mono">#4892</td><td>Integración API SAP-SCADA</td><td><span style="color:var(--red);font-weight:600;">18 días</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Abriendo ficha de incorporación','ok')">Ficha</button></td></tr>
-                <tr><td class="td-mono">#4901</td><td>Automatización cortes masivos</td><td><span style="color:var(--amber);font-weight:600;">9 días</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Abriendo ficha de incorporación','ok')">Ficha</button></td></tr>
-                <tr><td class="td-mono">#4915</td><td>Módulo pérdidas técnicas red</td><td><span style="color:var(--gray4);">3 días</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Abriendo ficha de incorporación','ok')">Ficha</button></td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== INFORME ===== -->
-    <div id="page-informe" class="page">
-      <div class="page-title">Informe Ejecutivo</div>
-      <div class="page-desc">Genera y envía el informe quincenal para la Gerencia General.</div>
-      <div class="two-col">
-        <div>
-          <div class="card section-gap">
-            <div class="card-header"><span class="card-title">Informe quincenal — 14 Abr 2025</span><span class="badge badge-blue">Sesión #12</span></div>
-            <div class="informe-preview">
-              <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;">Informe Ejecutivo CIPD</div>
-              <div style="font-size:12px;color:var(--gray4);margin-bottom:14px;">Período: 01–14 Abr 2025 · Preparado por: Secretaría Ejecutiva</div>
-              <div class="inf-section">
-                <div class="inf-section-title" style="color:var(--green);">Logros del período</div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--green);"></div><div>Portal de atención al cliente: UAT aprobado, entrega prevista 25 Mar. Reducción 22% en tiempo resolución de quejas.</div></div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--green);"></div><div>Módulo telemetría AMI integrado con SCADA. Piloto activo Zona Norte: 1,200 medidores conectados.</div></div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--green);"></div><div>Conciliación bancaria: reglas de negocio aprobadas por Gerencia Financiera. Inicio de desarrollo.</div></div>
-              </div>
-              <div class="inf-section">
-                <div class="inf-section-title" style="color:var(--red);">Riesgos y bloqueos activos</div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--red);"></div><div>Migración BD Regulatoria: proveedor con retraso 3 semanas. Se requiere decisión sobre alternativa.</div></div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--amber);"></div><div>AMR: atraso aduanal en hardware importado. Riesgo de retraso Q2.</div></div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--amber);"></div><div>SCADA: equipo TI al 90% capacidad. Se requiere autorización horas extra.</div></div>
-              </div>
-              <div class="inf-section">
-                <div class="inf-section-title" style="color:var(--blue);">Decisiones de sesión</div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--blue);"></div><div>Aprobada SOL-031 (Score 23, Crítico): modernización subestaciones zona sur.</div></div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--blue);"></div><div>Rechazada RRHH-007 por duplicidad con iniciativa en curso.</div></div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--blue);"></div><div>Aplazada GCom-031: recursos disponibles Q3.</div></div>
-              </div>
-              <div class="inf-section">
-                <div class="inf-section-title" style="color:var(--red);">Requiere atención Gerencia General</div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--red);"></div><div>Solicitud presupuesto adicional USD 85,000 para subestaciones — supera umbral del Comité.</div></div>
-                <div class="inf-item"><div class="inf-dot" style="background:var(--amber);"></div><div>Conflicto de prioridad GCom vs GDist sin resolución desde sesión #11.</div></div>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:14px;">
-              <button class="btn btn-outline btn-sm" onclick="toast('Exportando a PDF...','ok')">Exportar PDF</button>
-              <button class="btn btn-primary" onclick="toast('Informe enviado a Gerencia General','ok')">Enviar a Gerencia General ↗</button>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="card section-gap">
-            <div class="card-header"><span class="card-title">KPIs del Comité</span></div>
-            <div style="display:flex;flex-direction:column;gap:14px;">
-              <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;">Entrega a tiempo</span><span style="font-size:13px;font-weight:700;color:var(--green)">83% / meta 80%</span></div><div class="prog-wrap"><div class="prog-fill prog-green" style="width:83%"></div></div></div>
-              <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;">Acuerdos cumplidos</span><span style="font-size:13px;font-weight:700;color:var(--green)">91% / meta 90%</span></div><div class="prog-wrap"><div class="prog-fill prog-green" style="width:91%"></div></div></div>
-              <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;">Tiempo evaluación (días)</span><span style="font-size:13px;font-weight:700;color:var(--amber)">12 / meta 10</span></div><div class="prog-wrap"><div class="prog-fill prog-yellow" style="width:80%"></div></div></div>
-              <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;">Proyectos en rojo</span><span style="font-size:13px;font-weight:700;color:var(--amber)">3 / meta ≤2</span></div><div class="prog-wrap"><div class="prog-fill prog-yellow" style="width:60%"></div></div></div>
-              <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;">Sincronía GLPI-CIPD</span><span style="font-size:13px;font-weight:700;color:var(--green)">97% / meta 95%</span></div><div class="prog-wrap"><div class="prog-fill prog-green" style="width:97%"></div></div></div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-header"><span class="card-title">Historial de informes</span></div>
-            <div class="tbl-wrap">
-              <table>
-                <thead><tr><th>Sesión</th><th>Fecha</th><th>Estado</th></tr></thead>
-                <tbody>
-                  <tr><td class="td-bold">#11</td><td>05 Mar 2025</td><td><span class="badge badge-teal">Enviado</span></td></tr>
-                  <tr><td class="td-bold">#10</td><td>19 Feb 2025</td><td><span class="badge badge-teal">Enviado</span></td></tr>
-                  <tr><td class="td-bold">#9</td><td>05 Feb 2025</td><td><span class="badge badge-teal">Enviado</span></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== CHECKLIST ===== -->
-    <div id="page-checklist" class="page">
-      <div class="page-title">Lista de verificación constitutiva</div>
-      <div class="page-desc">Acciones previas a la sesión constitutiva del CIPD. Completa cada paso para asegurar el arranque.</div>
-      <div class="metric-row">
-        <div class="metric"><div class="metric-accent" style="background:var(--blue)"></div><div class="metric-label">Completadas</div><div class="metric-value" id="check-done" style="color:var(--green)">0</div></div>
-        <div class="metric"><div class="metric-accent" style="background:var(--gray3)"></div><div class="metric-label">Pendientes</div><div class="metric-value" id="check-pending" style="color:var(--amber)">11</div></div>
-        <div class="metric"><div class="metric-accent" style="background:var(--teal)"></div><div class="metric-label">Progreso</div><div class="metric-value" id="check-pct" style="color:var(--teal)">0%</div></div>
-        <div class="metric"><div class="metric-accent" style="background:var(--orange)"></div><div class="metric-label">Días para sesión</div><div class="metric-value" style="color:var(--orange)">3</div></div>
-      </div>
-      <div class="card" style="margin-bottom:20px;">
-        <div class="card-header"><span class="card-title">Progreso general</span></div>
-        <div class="prog-wrap" style="height:10px;border-radius:6px;"><div class="prog-fill" id="check-bar" style="width:0%;height:10px;border-radius:6px;"></div></div>
-      </div>
-      <div class="card">
-        <div id="checklist-items"></div>
-      </div>
-    </div>
 
   </div><!-- /content -->
 </div><!-- /main -->
 </div><!-- /shell -->
 
-<!-- MODALS -->
+<!-- MODAL -->
 <div id="modal-bg" class="modal-bg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="modal-title">Modal</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body" id="modal-body"></div>
-    <div class="modal-footer" id="modal-footer"></div>
-  </div>
-</div>
-
-<div class="toast-wrap" id="toast-wrap"></div>
-
-<!-- MODALS -->
-<div id="modal-bg" class="modal-bg" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
-    <div class="modal-hdr">
-      <div class="modal-title" id="modal-title">Modal</div>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
+    <div class="modal-hdr"><div class="modal-title" id="modal-title">Modal</div><button class="modal-close" onclick="closeModal()">✕</button></div>
     <div class="modal-body" id="modal-body"></div>
     <div class="modal-footer" id="modal-footer"></div>
   </div>
@@ -874,13 +551,12 @@ textarea{min-height:80px;resize:vertical;}
 <div class="toast-wrap" id="toast-wrap"></div>
 
 <script>
-
 // ╔══════════════════════════════════════════════════════════════════╗
 // ║  CONFIGURACIÓN SUPABASE — EDITA SOLO ESTAS DOS LÍNEAS           ║
 // ║  Encuentra estos valores en: Supabase → Settings → API          ║
 // ╚══════════════════════════════════════════════════════════════════╝
 const SUPABASE_URL  = 'https://llhlkwlpxbzbopmgkqid.supabase.co';       // Ej: https://xxxx.supabase.co
-const SUPABASE_ANON = 'sb_publishable_yWtc0C8nNTjLxAQPHv6AHw_Rfqf5Fqr';     // Clave anon/public
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsaGxrd2xweGJ6Ym9wbWdrcWlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NTUxMTgsImV4cCI6MjA5MjAzMTExOH0.cqrzhMS-YhVioHHrUanpHFFRxzPPl1aWCRQnhANjgyk';     // Clave anon/public
 
 // ── Supabase client (cargado desde CDN) ──────────────────────────────
 let _supa = null;
@@ -896,7 +572,7 @@ let currentUser = null;
 
 // ── Verificar si las claves son placeholder ───────────────────────────
 function isConfigured() {
-  return SUPABASE_URL !== 'TU_URL_AQUI' && SUPABASE_ANON !== 'TU_CLAVE_AQUI';
+  return SUPABASE_URL !== 'https://llhlkwlpxbzbopmgkqid.supabase.co' && SUPABASE_ANON !== 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxsaGxrd2xweGJ6Ym9wbWdrcWlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NTUxMTgsImV4cCI6MjA5MjAzMTExOH0.cqrzhMS-YhVioHHrUanpHFFRxzPPl1aWCRQnhANjgyk';
 }
 
 // ── Inicializar: revisar sesión existente ─────────────────────────────
@@ -1077,269 +753,517 @@ document.addEventListener('keydown', e => {
 });
 
 
-// ===== APP SCRIPT =====
-// ===== DATA =====
-const DIMS = [
-  {id:'op', label:'Impacto Operativo', desc:'Afectación al suministro si no se implementa'},
-  {id:'com', label:'Impacto Comercial / Cliente', desc:'Efecto en facturación, cobro, atención'},
-  {id:'reg', label:'Riesgo Regulatorio / CREE', desc:'Exposición a sanciones o incumplimientos'},
-  {id:'est', label:'Valor Estratégico', desc:'Alineación con el plan estratégico'},
-  {id:'urg', label:'Urgencia Temporal', desc:'Fechas límite o restricciones externas'},
-];
-let dimVals = {op:0,com:0,reg:0,est:0,urg:0};
+// ═══════════════════════════════════════════════════════════════
+//  CAPA DE DATOS — Lee y escribe en Supabase real
+//  Todas las funciones devuelven datos o null si hay error.
+// ═══════════════════════════════════════════════════════════════
 
-const PROJECTS = [
-  {id:'TI-018',glpi:'#4821',name:'Migración BD Regulatoria',gerencia:'TI',lider:'R. Mejía',avance:45,entrega:'15 Abr',status:'red',hito:'Entrega datos Q1',perfil:'C'},
-  {id:'GDist-024',glpi:'#4856',name:'Modernización subestaciones zona sur',gerencia:'Distribución',lider:'C. Andrade',avance:10,entrega:'30 Jun',status:'green',hito:'Diseño conceptual',perfil:'A'},
-  {id:'GCom-019',glpi:'#4780',name:'Portal atención al cliente',gerencia:'Comercial',lider:'L. Paz',avance:88,entrega:'25 Abr',status:'green',hito:'UAT final',perfil:'A'},
-  {id:'TI-021',glpi:'#4834',name:'Actualización SCADA',gerencia:'TI',lider:'M. Torres',avance:55,entrega:'30 Abr',status:'yellow',hito:'Módulo alarmas',perfil:'B'},
-  {id:'AMR-003',glpi:'#4802',name:'Integración medidores AMI',gerencia:'Distribución',lider:'J. Flores',avance:62,entrega:'15 May',status:'yellow',hito:'Piloto zona norte',perfil:'B'},
-  {id:'FIN-009',glpi:'#4845',name:'Conciliación bancaria automática',gerencia:'Financiero',lider:'A. Ramos',avance:30,entrega:'31 May',status:'yellow',hito:'Reglas conciliación',perfil:'B'},
-  {id:'TI-022',glpi:'#4871',name:'Seguridad perimetral red',gerencia:'TI',lider:'H. Soto',avance:70,entrega:'10 Abr',status:'red',hito:'Firewall zona DMZ',perfil:'C'},
-  {id:'GCom-027',glpi:'#4880',name:'Medición inteligente tarifas',gerencia:'Comercial',lider:'P. Girón',avance:15,entrega:'30 Jul',status:'green',hito:'Análisis tarifario',perfil:'A'},
-  {id:'GDist-020',glpi:'#4798',name:'GIS red distribución',gerencia:'Distribución',lider:'—',avance:0,entrega:'—',status:'red',hito:'Sin asignar',perfil:'C'},
-  {id:'RRHH-005',glpi:'#4812',name:'LMS capacitación técnica',gerencia:'RRHH',lider:'S. López',avance:40,entrega:'15 Jun',status:'green',hito:'Módulo seguridad eléctrica',perfil:'A'},
-  {id:'LEG-002',glpi:'#4855',name:'Sistema gestión contratos',gerencia:'Legal',lider:'T. Reyes',avance:25,entrega:'30 Jul',status:'yellow',hito:'Prototipo flujos',perfil:'B'},
-  {id:'FIN-011',glpi:'#4890',name:'Dashboard financiero gerencial',gerencia:'Financiero',lider:'E. Cruz',avance:60,entrega:'20 May',status:'green',hito:'Módulo proyecciones',perfil:'A'},
-];
+// ── Helpers ─────────────────────────────────────────────────────
+function supa() { return getSupa(); }
 
-const BACKLOG = [
-  {id:'SOL-031',glpi:'#4892',name:'Sistema GIS distribución red',gerencia:'Distribución',score:23,nivel:'CRÍTICO',estado:'En evaluación',fecha:'10 Abr 2025'},
-  {id:'SOL-029',glpi:'#4901',name:'Automatización cortes y reconexiones',gerencia:'Distribución',score:21,nivel:'CRÍTICO',estado:'En evaluación',fecha:'08 Abr 2025'},
-  {id:'SOL-030',glpi:'#4888',name:'Módulo gestión pérdidas técnicas',gerencia:'TI',score:18,nivel:'ALTO',estado:'Aprobado',fecha:'07 Abr 2025'},
-  {id:'SOL-028',glpi:'#4875',name:'CRM clientes masivos',gerencia:'Comercial',score:17,nivel:'ALTO',estado:'Aprobado',fecha:'03 Abr 2025'},
-  {id:'SOL-026',glpi:'#4862',name:'Integración SAP-SCADA',gerencia:'TI',score:16,nivel:'ALTO',estado:'En evaluación',fecha:'28 Mar 2025'},
-  {id:'SOL-025',glpi:'#4849',name:'App móvil lectura de medidores',gerencia:'Comercial',score:13,nivel:'MEDIO',estado:'Pendiente',fecha:'20 Mar 2025'},
-  {id:'SOL-024',glpi:'#4836',name:'Capacitación LMS personal técnico',gerencia:'RRHH',score:9,nivel:'MEDIO',estado:'Pendiente',fecha:'15 Mar 2025'},
-  {id:'SOL-023',glpi:'#4822',name:'Rediseño intranet corporativa',gerencia:'TI',score:6,nivel:'BAJO',estado:'Pendiente',fecha:'10 Mar 2025'},
-];
+async function dbGet(table, query='') {
+  const s = supa(); if (!s) return [];
+  try {
+    let q = s.from(table).select(query || '*');
+    const { data, error } = await q;
+    if (error) { console.error(table, error.message); return []; }
+    return data || [];
+  } catch(e) { console.error(e); return []; }
+}
 
-const RISKS = [
-  {nombre:'Retraso proveedor BD Regulatoria',proyecto:'TI-018',tipo:'Técnico',prob:4,impacto:4,nivel:'ALTO',estado:'Activo',plan:'Evaluar proveedor alternativo'},
-  {nombre:'Atraso importación hardware AMR',proyecto:'AMR-003',tipo:'Recursos',prob:3,impacto:4,nivel:'ALTO',estado:'Mitigando',plan:'Gestión aduanal urgente'},
-  {nombre:'Capacidad equipo TI al límite',proyecto:'TI-022',tipo:'Recursos',prob:4,impacto:3,nivel:'ALTO',estado:'Activo',plan:'Solicitud horas extra pendiente'},
-  {nombre:'Cambio normativa CREE pendiente',proyecto:'GDist-024',tipo:'Regulatorio',prob:2,impacto:5,nivel:'MEDIO',estado:'Monitoreando',plan:'Seguimiento activo con Legal'},
-  {nombre:'Rotación líder proyecto FIN-009',proyecto:'FIN-009',tipo:'Organizacional',prob:2,impacto:3,nivel:'MEDIO',estado:'Mitigando',plan:'Plan de sucesión en preparación'},
-];
+async function dbInsert(table, payload) {
+  const s = supa(); if (!s) return null;
+  try {
+    const { data, error } = await s.from(table).insert(payload).select().single();
+    if (error) { console.error('INSERT', table, error.message); return null; }
+    return data;
+  } catch(e) { console.error(e); return null; }
+}
 
-const ACUERDOS = [
-  {num:1,texto:'Aprobar SOL-031 para inicio Q2',resp:'Gte. Planificación',fecha:'03 Abr',estado:'Pendiente'},
-  {num:2,texto:'Contratar proveedor alternativo BD Regulatoria',resp:'Gte. TI',fecha:'25 Mar',estado:'En proceso'},
-  {num:3,texto:'Solicitar presupuesto adicional subestaciones a Gte. General',resp:'Secretaría',fecha:'22 Mar',estado:'En proceso'},
-  {num:4,texto:'Validar UAT Portal Cliente con Gerencia Comercial',resp:'Gte. Comercial',fecha:'24 Mar',estado:'Completado'},
-];
+async function dbUpdate(table, id, payload) {
+  const s = supa(); if (!s) return null;
+  try {
+    const { data, error } = await s.from(table).update(payload).eq('id', id).select().single();
+    if (error) { console.error('UPDATE', table, error.message); return null; }
+    return data;
+  } catch(e) { console.error(e); return null; }
+}
 
-const AGENDA = [
-  {time:'0–5 min',title:'Apertura y validación de quórum',desc:'Verificar asistencia mínima de 5 miembros con voto'},
-  {time:'5–10 min',title:'Aprobación acta sesión #11',desc:'Revisión y firma del acta anterior'},
-  {time:'10–25 min',title:'Tablero ejecutivo: semáforo de proyectos',desc:'Dashboard de los 12 proyectos activos'},
-  {time:'25–45 min',title:'Revisión bloqueos: TI-018, TI-022, GDist-020',desc:'Proyectos en perfil C — decisión del comité'},
-  {time:'45–75 min',title:'Evaluación nuevas solicitudes: SOL-031, SOL-029',desc:'Votación con matriz de criticidad'},
-  {time:'75–85 min',title:'Ajuste de prioridades',desc:'Re-evaluación de solicitudes con cambio de contexto'},
-  {time:'85–90 min',title:'Acuerdos, responsables y cierre',desc:'Registro formal de decisiones y compromisos'},
-];
+// ── Gerencias ────────────────────────────────────────────────────
+async function loadGerencias() {
+  return await dbGet('gerencias', 'id,nombre,codigo');
+}
 
-const CHECKLIST = [
-  {texto:'Exportar tickets activos GLPI con categoría Desarrollo / Cambio',resp:'Admin GLPI',plazo:'Día 1'},
-  {texto:'Revisar cada ticket con el técnico asignado y completar la Ficha de Incorporación',resp:'Secretario Ejecutivo + Gte. TI',plazo:'Días 2-4'},
-  {texto:'Identificar proyectos sin líder asignado, sin fecha de entrega o sin presupuesto',resp:'Secretario Ejecutivo',plazo:'Día 3'},
-  {texto:'Aplicar la Matriz de Criticidad CIPD a cada proyecto existente',resp:'Secretario Ejecutivo',plazo:'Días 4-5'},
-  {texto:'Clasificar cada proyecto en perfil A (control), B (riesgo), C (crítico) o D (revisar)',resp:'Secretario Ejecutivo',plazo:'Día 5'},
-  {texto:'Construir el tablero inicial del portafolio con todos los proyectos clasificados',resp:'Secretario Ejecutivo',plazo:'Días 6-7'},
-  {texto:'Preparar propuesta de líderes para proyectos sin responsable designado',resp:'Gte. TI + Gte. Planificación',plazo:'Día 7'},
-  {texto:'Definir fechas de entrega tentativas para proyectos que no las tienen',resp:'Gte. TI + Gerencias responsables',plazo:'Días 7-8'},
-  {texto:'Preparar agenda de sesión constitutiva con portafolio completo adjunto',resp:'Secretario Ejecutivo',plazo:'Día 9'},
-  {texto:'Enviar convocatoria formal a todos los miembros del Comité (48 h anticipación)',resp:'Secretario Ejecutivo',plazo:'Día 10'},
-  {texto:'Sesión constitutiva: ratificar portafolio, asignar líderes, aprobar backlog inicial',resp:'Todos los miembros CIPD',plazo:'Día 12-15'},
-];
-let checkState = CHECKLIST.map(()=>false);
+// ── Usuarios ─────────────────────────────────────────────────────
+async function loadUsuarios() {
+  return await dbGet('usuarios_cipd', 'id,nombre_completo,correo,rol,es_miembro_voto,gerencia_id,activo');
+}
 
-// ===== HELPERS =====
+// ── Solicitudes (Backlog) ─────────────────────────────────────────
+async function loadSolicitudes(filtros = {}) {
+  const s = supa(); if (!s) return [];
+  try {
+    let q = s.from('solicitudes').select(`
+      id,codigo_cipd,glpi_id,nombre,score_total,nivel_prioridad,
+      estado,fecha_ingreso,presupuesto_usd,
+      gerencias!gerencia_id(nombre),
+      solicitante:usuarios_cipd!solicitante_id(nombre_completo)
+    `);
+    if (filtros.nivel) q = q.eq('nivel_prioridad', filtros.nivel);
+    if (filtros.estado) q = q.eq('estado', filtros.estado);
+    q = q.order('score_total', { ascending: false });
+    const { data, error } = await q;
+    if (error) { console.error('solicitudes', error.message); return []; }
+    return data || [];
+  } catch(e) { console.error(e); return []; }
+}
+
+async function saveSolicitud(form) {
+  // form: {nombre, glpi_id, gerencia_id, solicitante_id, descripcion,
+  //         problema_que_resuelve, beneficio_esperado, recursos_dias,
+  //         presupuesto_usd, fecha_limite_deseada, dependencias}
+  return await dbInsert('solicitudes', form);
+}
+
+// ── Evaluación de Matriz ──────────────────────────────────────────
+async function saveEvaluacion(form) {
+  // form: {solicitud_id, evaluador_id, dim_operativo..dim_urgencia, mods}
+  const row = await dbInsert('evaluaciones_matriz', form);
+  if (row && form.solicitud_id) {
+    // Actualizar score en solicitudes
+    await dbUpdate('solicitudes', form.solicitud_id, {
+      score_total: row.score_final,
+      nivel_prioridad: row.nivel_resultado,
+      estado: 'en_evaluacion'
+    });
+  }
+  return row;
+}
+
+// ── Proyectos ─────────────────────────────────────────────────────
+async function loadProyectos(soloActivos = true) {
+  const s = supa(); if (!s) return [];
+  try {
+    let q = s.from('proyectos').select(`
+      id,codigo_cipd,glpi_id,nombre,avance_pct,semaforo,perfil_glpi,
+      estado,fecha_entrega,proximo_hito,bloqueos_activos,
+      presupuesto_aprobado,presupuesto_ejecutado,
+      gerencias!gerencia_id(nombre),
+      lider:usuarios_cipd!lider_id(nombre_completo)
+    `);
+    if (soloActivos) q = q.eq('estado', 'activo');
+    q = q.order('semaforo', { ascending: true });
+    const { data, error } = await q;
+    if (error) { console.error('proyectos', error.message); return []; }
+    return data || [];
+  } catch(e) { console.error(e); return []; }
+}
+
+async function saveProyecto(form) {
+  return await dbInsert('proyectos', form);
+}
+
+async function updateAvance(proyectoId, avancePct, semaforo, hito, bloqueos, notas) {
+  const usuarioId = await getMiId();
+  const row = await dbInsert('avances_proyecto', {
+    proyecto_id: proyectoId,
+    reportado_por: usuarioId,
+    avance_pct: avancePct,
+    semaforo, hito_completado: hito,
+    proximo_hito: hito, bloqueos, notas
+  });
+  return row;
+}
+
+// ── Riesgos ───────────────────────────────────────────────────────
+async function loadRiesgos() {
+  const s = supa(); if (!s) return [];
+  try {
+    const { data, error } = await s.from('riesgos').select(`
+      id,descripcion,tipo_riesgo,probabilidad,impacto,
+      score_riesgo,nivel_riesgo,estado,plan_mitigacion,fecha_revision,
+      proyectos!proyecto_id(codigo_cipd,nombre)
+    `).neq('estado','cerrado').order('score_riesgo', { ascending: false });
+    if (error) { console.error('riesgos', error.message); return []; }
+    return data || [];
+  } catch(e) { console.error(e); return []; }
+}
+
+async function saveRiesgo(form) {
+  return await dbInsert('riesgos', form);
+}
+
+// ── Sesiones ──────────────────────────────────────────────────────
+async function loadSesiones() {
+  const s = supa(); if (!s) return [];
+  try {
+    const { data, error } = await s.from('sesiones').select(`
+      id,numero_sesion,tipo,fecha,hora_inicio,modalidad,
+      quorum_confirmado,miembros_presentes,estado,acta_enviada,
+      convocada_por:usuarios_cipd!convocada_por(nombre_completo)
+    `).order('fecha', { ascending: false }).limit(20);
+    if (error) { console.error('sesiones', error.message); return []; }
+    return data || [];
+  } catch(e) { console.error(e); return []; }
+}
+
+async function saveSesion(form) {
+  const usuarioId = await getMiId();
+  return await dbInsert('sesiones', { ...form, convocada_por: usuarioId });
+}
+
+// ── Acuerdos ──────────────────────────────────────────────────────
+async function loadAcuerdos(sesionId = null) {
+  const s = supa(); if (!s) return [];
+  try {
+    let q = s.from('acuerdos').select(`
+      id,numero_acuerdo,descripcion,tipo_acuerdo,
+      fecha_compromiso,estado,observaciones,
+      sesiones!sesion_id(numero_sesion,fecha),
+      responsable:usuarios_cipd!responsable_id(nombre_completo),
+      proyectos!proyecto_id(codigo_cipd)
+    `).in('estado',['pendiente','en_proceso']).order('fecha_compromiso', { ascending: true });
+    if (sesionId) q = q.eq('sesion_id', sesionId);
+    const { data, error } = await q;
+    if (error) { console.error('acuerdos', error.message); return []; }
+    return data || [];
+  } catch(e) { console.error(e); return []; }
+}
+
+async function saveAcuerdo(form) {
+  return await dbInsert('acuerdos', form);
+}
+
+// ── KPIs (vista) ─────────────────────────────────────────────────
+async function loadKPIs() {
+  const s = supa(); if (!s) return null;
+  try {
+    const { data, error } = await s.from('v_kpis_comite').select('*').single();
+    if (error) return null;
+    return data;
+  } catch(e) { return null; }
+}
+
+// ── Helper: obtener mi ID de usuario_cipd ────────────────────────
+async function getMiId() {
+  const s = supa(); if (!s) return null;
+  try {
+    const { data: { user } } = await s.auth.getUser();
+    if (!user) return null;
+    const { data } = await s.from('usuarios_cipd').select('id').eq('auth_user_id', user.id).single();
+    return data?.id || null;
+  } catch(e) { return null; }
+}
+
+async function loadMiPerfil() {
+  const s = supa(); if (!s) return null;
+  try {
+    const { data: { user } } = await s.auth.getUser();
+    if (!user) return null;
+    const { data } = await s.from('usuarios_cipd').select('id,nombre_completo,rol,gerencias!gerencia_id(nombre)').eq('auth_user_id', user.id).single();
+    return data;
+  } catch(e) { return null; }
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDERS — usan datos reales de Supabase
+// ═══════════════════════════════════════════════════════════════
+
+// ── Estado global ────────────────────────────────────────────────
+let GERENCIAS = [];
+let USUARIOS  = [];
+let dimVals   = {op:0,com:0,reg:0,est:0,urg:0};
+
+// ── Utilidades de display ─────────────────────────────────────────
 function nivelBadge(n){
   const m={CRÍTICO:'badge-critico',ALTO:'badge-alto',MEDIO:'badge-medio',BAJO:'badge-bajo'};
-  return `<span class="badge ${m[n]||'badge-gray'}">${n}</span>`;
+  return `<span class="badge ${m[n]||'badge-gray'}">${n||'—'}</span>`;
 }
 function estadoBadge(e){
-  const m={'Aprobado':'est-green','En evaluación':'est-blue','Pendiente':'est-gray','Rechazado':'est-red','Aplazado':'est-gray','En proceso':'est-amber','Completado':'est-green'};
-  return `<span class="badge ${m[e]||'badge-gray'}" style="font-size:11px;">${e}</span>`;
+  const m={aprobado:'est-green',en_ejecucion:'est-green',completado:'est-green',
+           en_evaluacion:'est-blue',pendiente:'est-gray',
+           rechazado:'est-red',cancelado:'est-red',
+           aplazado:'est-gray',en_proceso:'est-amber',en_revision:'est-amber'};
+  const label=(e||'').replace(/_/g,' ');
+  return `<span class="badge ${m[e]||'badge-gray'}" style="font-size:11px;">${label}</span>`;
 }
 function perfilBadge(p){
   const labels={A:'A — Control',B:'B — Riesgo',C:'C — Crítico',D:'D — Revisar'};
   const classes={A:'perfil-a',B:'perfil-b',C:'perfil-c',D:'perfil-d'};
-  return `<span class="badge ${classes[p]||'badge-gray'}" style="font-size:11px;">${labels[p]||p}</span>`;
+  return `<span class="badge ${classes[p]||'badge-gray'}" style="font-size:11px;">${labels[p]||p||'—'}</span>`;
 }
 function semIcon(s){
-  return `<span class="sem sem-${s}"></span>`;
+  const c={rojo:'red',amarillo:'yellow',verde:'green'};
+  return `<span class="sem sem-${c[s]||'green'}"></span>`;
 }
-function progBar(pct,status){
-  const cls=status==='red'?'prog-red':status==='yellow'?'prog-yellow':'prog-green';
-  return `<div style="display:flex;align-items:center;gap:8px;min-width:100px;"><div class="prog-wrap" style="flex:1;"><div class="prog-fill ${cls}" style="width:${pct}%"></div></div><span style="font-size:11px;color:var(--gray4);white-space:nowrap;">${pct}%</span></div>`;
+function progBar(pct,sem){
+  const cls=sem==='rojo'?'prog-red':sem==='amarillo'?'prog-yellow':'prog-green';
+  return `<div style="display:flex;align-items:center;gap:8px;min-width:100px;"><div class="prog-wrap" style="flex:1;"><div class="prog-fill ${cls}" style="width:${pct}%"></div></div><span style="font-size:11px;color:var(--gray4);">${pct}%</span></div>`;
 }
 function scoreColor(s){
   if(s>=21) return 'var(--red)';
   if(s>=15) return 'var(--amber)';
-  if(s>=9) return '#8B7500';
+  if(s>=9)  return '#8B7500';
   return 'var(--green)';
 }
-function riesgoNivelBadge(n){
-  const m={ALTO:'badge-critico',MEDIO:'badge-alto',BAJO:'badge-bajo'};
-  return `<span class="badge ${m[n]||'badge-gray'}">${n}</span>`;
+function fmt(d){ return d ? new Date(d+'T00:00:00').toLocaleDateString('es-HN',{day:'2-digit',month:'short',year:'numeric'}) : '—'; }
+function loading(el){ if(el) el.innerHTML=`<tr><td colspan="20" style="text-align:center;padding:24px;color:var(--gray4);">Cargando...</td></tr>`; }
+function empty(el, msg='Sin datos registrados'){
+  if(el) el.innerHTML=`<tr><td colspan="20" style="text-align:center;padding:24px;color:var(--gray4);">${msg}</td></tr>`;
 }
 
-// ===== NAVIGATION =====
-function nav(page,el){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+page).classList.add('active');
-  if(el){document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));el.classList.add('active');}
-  const titles={
-    dashboard:'Dashboard General',backlog:'Backlog de Solicitudes',
-    matriz:'Matriz de Criticidad',proyectos:'Proyectos Activos',
-    riesgos:'Gestión de Riesgos',sesion:'Sesiones & Actas',
-    glpi:'Integración GLPI',informe:'Informe Ejecutivo',checklist:'Lista de Verificación'
-  };
-  document.getElementById('topbar-title').textContent=titles[page]||page;
-  const renders={backlog:renderBacklog,riesgos:renderRiesgos,proyectos:renderKanban,glpi:()=>renderGLPI(''),checklist:renderChecklist,sesion:renderSesion,matriz:renderDims};
-  if(renders[page]) renders[page]();
+// ── DASHBOARD ─────────────────────────────────────────────────────
+async function renderDashboard(){
+  const [proyectos, solicitudes, kpis] = await Promise.all([
+    loadProyectos(true), loadSolicitudes({estado:'pendiente'}), loadKPIs()
+  ]);
+
+  // Métricas
+  if(kpis){
+    setMetric('m-activos',  kpis.proyectos_activos||0,  `${kpis.proyectos_rojo||0} en riesgo`);
+    setMetric('m-backlog',  solicitudes.length,          '');
+    setMetric('m-entrega',  (kpis.pct_entrega_tiempo||0)+'%', 'Meta ≥ 80%');
+  } else {
+    setMetric('m-activos', proyectos.length, '');
+    setMetric('m-backlog', solicitudes.length, '');
+    setMetric('m-entrega', '—', 'Sin datos aún');
+  }
+
+  // Semáforo de proyectos
+  const st = document.getElementById('tbl-semaforo');
+  if(st){
+    loading(st);
+    if(!proyectos.length){ empty(st,'No hay proyectos activos registrados'); }
+    else {
+      st.innerHTML = proyectos.slice(0,6).map(p=>`<tr>
+        <td>${semIcon(p.semaforo)}</td>
+        <td class="td-bold">${p.nombre}</td>
+        <td style="font-size:12px;">${p.gerencias?.nombre||'—'}</td>
+        <td>${progBar(p.avance_pct||0, p.semaforo)}</td>
+        <td style="font-size:12px;white-space:nowrap;">${fmt(p.fecha_entrega)}</td>
+      </tr>`).join('');
+    }
+  }
+
+  // Backlog mini
+  const bm = document.getElementById('tbl-backlog-mini');
+  const todas = await loadSolicitudes();
+  if(bm){
+    if(!todas.length){ empty(bm,'No hay solicitudes registradas aún'); }
+    else {
+      bm.innerHTML = todas.slice(0,5).map((bl,i)=>`<tr>
+        <td style="color:var(--gray4);font-size:12px;">${i+1}</td>
+        <td class="td-bold">${bl.nombre}</td>
+        <td style="font-size:12px;">${bl.gerencias?.nombre||'—'}</td>
+        <td class="td-mono">${bl.glpi_id||'—'}</td>
+        <td style="font-weight:700;color:${scoreColor(bl.score_total||0)};">${bl.score_total||0}</td>
+        <td>${nivelBadge(bl.nivel_prioridad)}</td>
+        <td>${estadoBadge(bl.estado)}</td>
+      </tr>`).join('');
+    }
+  }
 }
 
-// ===== RENDERS =====
-function renderDashboard(){
-  const s=document.getElementById('tbl-semaforo');
-  if(!s) return;
-  s.innerHTML=PROJECTS.slice(0,6).map(p=>`<tr>
-    <td>${semIcon(p.status)}</td>
-    <td class="td-bold">${p.name}</td>
-    <td><span style="font-size:12px;color:var(--gray4);">${p.gerencia}</span></td>
-    <td>${progBar(p.avance,p.status)}</td>
-    <td style="font-size:12px;white-space:nowrap;">${p.entrega}</td>
-  </tr>`).join('');
-  const b=document.getElementById('tbl-backlog-mini');
-  b.innerHTML=BACKLOG.slice(0,5).map((bl,i)=>`<tr>
-    <td style="color:var(--gray4);font-size:12px;">${i+1}</td>
-    <td class="td-bold">${bl.name}</td>
-    <td style="font-size:12px;">${bl.gerencia}</td>
-    <td class="td-mono">${bl.glpi}</td>
-    <td style="font-weight:700;color:${scoreColor(bl.score)};">${bl.score}</td>
-    <td>${nivelBadge(bl.nivel)}</td>
-    <td>${estadoBadge(bl.estado)}</td>
-  </tr>`).join('');
+function setMetric(id, val, sub){
+  const el = document.getElementById(id);
+  if(el){ el.querySelector('.metric-value').textContent = val; el.querySelector('.metric-sub').textContent = sub||''; }
 }
 
-function renderBacklog(){
-  const fNivel=document.getElementById('filter-nivel')?.value||'';
-  const fEstado=document.getElementById('filter-estado')?.value||'';
-  const data=BACKLOG.filter(b=>(fNivel===''||b.nivel===fNivel)&&(fEstado===''||b.estado===fEstado));
-  const tb=document.getElementById('tbl-backlog');
-  if(!tb) return;
-  tb.innerHTML=data.map(b=>`<tr>
-    <td class="td-mono td-bold">${b.id}</td>
-    <td class="td-mono">${b.glpi}</td>
-    <td style="font-weight:500;">${b.name}</td>
-    <td style="font-size:12px;">${b.gerencia}</td>
-    <td style="font-weight:700;color:${scoreColor(b.score)};">${b.score}</td>
-    <td>${nivelBadge(b.nivel)}</td>
+// ── BACKLOG ────────────────────────────────────────────────────────
+async function renderBacklog(){
+  const fNivel  = document.getElementById('filter-nivel')?.value  || '';
+  const fEstado = document.getElementById('filter-estado')?.value || '';
+  const tb = document.getElementById('tbl-backlog');
+  loading(tb);
+  const data = await loadSolicitudes({ nivel: fNivel||undefined, estado: fEstado||undefined });
+  if(!data.length){ empty(tb,'No hay solicitudes. Usa el botón + Nueva solicitud para registrar la primera.'); return; }
+  tb.innerHTML = data.map(b=>`<tr>
+    <td class="td-mono td-bold">${b.codigo_cipd||'—'}</td>
+    <td class="td-mono">${b.glpi_id||'—'}</td>
+    <td style="font-weight:500;">${b.nombre}</td>
+    <td style="font-size:12px;">${b.gerencias?.nombre||'—'}</td>
+    <td style="font-weight:700;color:${scoreColor(b.score_total||0)};">${b.score_total||0}</td>
+    <td>${nivelBadge(b.nivel_prioridad)}</td>
     <td>${estadoBadge(b.estado)}</td>
-    <td style="font-size:11px;color:var(--gray4);">${b.fecha}</td>
-    <td><button class="btn btn-outline btn-sm" onclick="toast('Abriendo ficha ${b.id}','ok')">Ficha</button></td>
+    <td style="font-size:11px;color:var(--gray4);">${fmt(b.fecha_ingreso)}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="verSolicitud('${b.id}','${b.codigo_cipd||b.id}')">Ver</button></td>
   </tr>`).join('');
 }
 
-function renderDims(){
-  const c=document.getElementById('dim-container');
+async function verSolicitud(id, codigo){
+  toast(`Abriendo ficha ${codigo}`,'ok');
+}
+
+// ── MATRIZ ─────────────────────────────────────────────────────────
+const DIMS=[
+  {id:'op', label:'Impacto Operativo', desc:'Afectación al suministro si no se implementa'},
+  {id:'com',label:'Impacto Comercial / Cliente', desc:'Efecto en facturación, cobro, atención'},
+  {id:'reg',label:'Riesgo Regulatorio / CREE', desc:'Exposición a sanciones o incumplimientos'},
+  {id:'est',label:'Valor Estratégico', desc:'Alineación con el plan estratégico'},
+  {id:'urg',label:'Urgencia Temporal', desc:'Fechas límite o restricciones externas'},
+];
+
+async function renderDims(){
+  const c = document.getElementById('dim-container');
   if(!c) return;
-  c.innerHTML=DIMS.map(d=>`<div class="dim-row">
+
+  // Selector de solicitud
+  const sols = await loadSolicitudes({estado:'pendiente'});
+  const solOpts = sols.length
+    ? sols.map(s=>`<option value="${s.id}">${s.codigo_cipd||'—'} — ${s.nombre.substring(0,40)}</option>`).join('')
+    : '<option value="">Sin solicitudes pendientes</option>';
+
+  c.innerHTML = `<div class="form-group" style="margin-bottom:16px;">
+    <label>Solicitud a evaluar</label>
+    <select id="eval-solicitud-id"><option value="">— Selecciona una solicitud —</option>${solOpts}</select>
+  </div>` +
+  DIMS.map(d=>`<div class="dim-row">
     <div class="dim-name">
       <div style="font-weight:500;">${d.label}</div>
       <div style="font-size:11px;color:var(--gray4);">${d.desc}</div>
     </div>
     <div class="dim-stars">${[1,2,3,4,5].map(v=>`<div class="star${dimVals[d.id]>=v?' on':''}" onclick="setDim('${d.id}',${v})">${v}</div>`).join('')}</div>
   </div>`).join('');
-  const ul=document.getElementById('tbl-ultimas-eval');
-  if(ul) ul.innerHTML=BACKLOG.slice(0,5).map(b=>`<tr><td style="font-size:12px;">${b.name}</td><td style="font-weight:700;color:${scoreColor(b.score)};">${b.score}</td><td>${nivelBadge(b.nivel)}</td></tr>`).join('');
+
+  const ul = document.getElementById('tbl-ultimas-eval');
+  if(ul){
+    const evs = await dbGet('evaluaciones_matriz',
+      'score_final,nivel_resultado,fecha_evaluacion,solicitudes!solicitud_id(nombre)');
+    if(evs.length){
+      ul.innerHTML = evs.slice(0,5).map(e=>`<tr>
+        <td style="font-size:12px;">${e.solicitudes?.nombre||'—'}</td>
+        <td style="font-weight:700;color:${scoreColor(e.score_final||0)};">${e.score_final||0}</td>
+        <td>${nivelBadge(e.nivel_resultado)}</td>
+      </tr>`).join('');
+    } else {
+      empty(ul,'Sin evaluaciones aún');
+    }
+  }
   calcScore();
 }
 
-function setDim(id,val){dimVals[id]=val;renderDims();}
+function setDim(id,val){ dimVals[id]=val; renderDims(); }
 function calcScore(){
-  let s=Object.values(dimVals).reduce((a,b)=>a+b,0);
-  const mods=(document.getElementById('mod-reg')?.checked?2:0)+(document.getElementById('mod-dep')?.checked?1:0)-(document.getElementById('mod-sin')?.checked?1:0)-(document.getElementById('mod-dup')?.checked?2:0);
-  s=Math.max(0,Math.min(25,s+mods));
-  const el=document.getElementById('score-num');
-  const bl=document.getElementById('score-nivel-badge');
+  const total = Object.values(dimVals).reduce((a,b)=>a+b,0);
+  const mods  = (document.getElementById('mod-reg')?.checked?2:0)
+              + (document.getElementById('mod-dep')?.checked?1:0)
+              - (document.getElementById('mod-sin')?.checked?1:0)
+              - (document.getElementById('mod-dup')?.checked?2:0);
+  const s = Math.max(0,Math.min(27,total+mods));
+  const el = document.getElementById('score-num');
+  const bl = document.getElementById('score-nivel-badge');
   if(!el) return;
   let nivel,color,bg;
   if(s>=21){nivel='CRÍTICO';color='#C0123A';bg='var(--red-pale)';}
   else if(s>=15){nivel='ALTO';color='#9A5500';bg='var(--amber-pale)';}
   else if(s>=9){nivel='MEDIO';color='#7A6200';bg='#FFF9E0';}
   else if(s>=5){nivel='BAJO';color='#006B52';bg='var(--green-pale)';}
-  else{nivel='Sin evaluar';color='var(--gray3)';bg:'var(--gray2)';color='var(--gray4)';}
+  else{nivel='Sin evaluar';color='var(--gray3)';bg='var(--gray2)';}
   el.textContent=s;
   el.style.color=s>0?color:'var(--gray3)';
   bl.textContent=s>=5?`Nivel ${nivel}`:nivel;
   bl.style.background=s>=5?bg:'var(--gray2)';
   bl.style.color=s>=5?color:'var(--gray4)';
 }
-function resetMatriz(){DIMS.forEach(d=>dimVals[d.id]=0);['mod-reg','mod-dep','mod-sin','mod-dup'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;});renderDims();}
-function guardarScore(){
-  const s=parseInt(document.getElementById('score-num')?.textContent)||0;
-  if(s<5){toast('Completa todas las dimensiones para guardar','warn');return;}
-  toast(`Score ${s} guardado en backlog`,'ok');
+function resetMatriz(){ DIMS.forEach(d=>dimVals[d.id]=0); ['mod-reg','mod-dep','mod-sin','mod-dup'].forEach(id=>{const el=document.getElementById(id);if(el)el.checked=false;}); renderDims(); }
+async function guardarScore(){
+  const solId = document.getElementById('eval-solicitud-id')?.value;
+  if(!solId){ toast('Selecciona una solicitud primero','warn'); return; }
+  const score = parseInt(document.getElementById('score-num')?.textContent)||0;
+  if(score<5){ toast('Completa todas las dimensiones','warn'); return; }
+  const mods = (document.getElementById('mod-reg')?.checked?2:0)
+             + (document.getElementById('mod-dep')?.checked?1:0)
+             - (document.getElementById('mod-sin')?.checked?1:0)
+             - (document.getElementById('mod-dup')?.checked?2:0);
+  const mid = await getMiId();
+  const res = await saveEvaluacion({
+    solicitud_id: solId, evaluador_id: mid,
+    dim_operativo:dimVals.op, dim_comercial:dimVals.com,
+    dim_regulatorio:dimVals.reg, dim_estrategico:dimVals.est, dim_urgencia:dimVals.urg,
+    mod_regulatorio: document.getElementById('mod-reg')?.checked?2:0,
+    mod_dependencia: document.getElementById('mod-dep')?.checked?1:0,
+    mod_sin_recursos: document.getElementById('mod-sin')?.checked?-1:0,
+    mod_duplicado:   document.getElementById('mod-dup')?.checked?-2:0,
+  });
+  if(res){ toast(`Score ${score} guardado — Solicitud actualizada`,'ok'); resetMatriz(); }
+  else toast('Error al guardar. Intenta de nuevo.','err');
 }
 
-function renderKanban(){
-  const board=document.getElementById('kanban-board');
-  const tbl=document.getElementById('tbl-proyectos');
-  if(!board) return;
-  const cols=[
-    {title:'Backlog aprobado',key:'backlog',items:BACKLOG.filter(b=>b.estado==='Aprobado')},
-    {title:'En ejecución',key:'exec',items:PROJECTS.filter(p=>p.avance>0&&p.avance<80)},
-    {title:'En revisión / UAT',key:'review',items:PROJECTS.filter(p=>p.avance>=80)},
-    {title:'Completado Q1',key:'done',items:[]},
+// ── PROYECTOS ──────────────────────────────────────────────────────
+async function renderKanban(){
+  const todos = await loadProyectos(false);
+  const board = document.getElementById('kanban-board');
+  const tbl   = document.getElementById('tbl-proyectos');
+
+  const cols = [
+    {title:'Backlog aprobado', filter: p => p.estado==='activo' && p.avance_pct===0},
+    {title:'En ejecución',     filter: p => p.estado==='activo' && p.avance_pct>0 && p.avance_pct<80},
+    {title:'En revisión / UAT',filter: p => p.estado==='activo' && p.avance_pct>=80},
+    {title:'Completado',       filter: p => p.estado==='completado'},
   ];
-  board.innerHTML=cols.map(col=>{
-    const cards=col.items.map(it=>`<div class="kb-card" onclick="toast('Abriendo ficha ${it.id||it.name}','ok')">
-      <div class="kb-card-title">${it.name}</div>
-      <div class="kb-card-meta">
-        ${it.status?semIcon(it.status):''}
-        <span>${it.gerencia}</span>
-        ${it.avance!==undefined?`<span>· ${it.avance}%</span>`:''}
-        ${it.nivel?nivelBadge(it.nivel):''}
-      </div>
-    </div>`).join('');
-    return `<div class="kb-col">
-      <div class="kb-col-hdr">${col.title} <span class="kb-cnt">${col.items.length}</span></div>
-      ${cards||'<div style="font-size:12px;color:var(--gray3);text-align:center;padding:20px 0;">Vacío</div>'}
-    </div>`;
-  }).join('');
-  if(tbl) tbl.innerHTML=PROJECTS.map(p=>`<tr>
-    <td class="td-mono">${p.id}</td>
-    <td style="font-weight:500;">${p.name}</td>
-    <td style="font-size:12px;">${p.lider}</td>
-    <td style="font-size:12px;">${p.gerencia}</td>
-    <td>${perfilBadge(p.perfil)}</td>
-    <td>${progBar(p.avance,p.status)}</td>
-    <td style="font-size:12px;">${p.entrega}</td>
-    <td>${semIcon(p.status)}</td>
-    <td><button class="btn btn-outline btn-sm" onclick="toast('Abriendo ${p.id}','ok')">Ver</button></td>
-  </tr>`).join('');
+
+  if(board){
+    if(!todos.length){
+      board.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--gray4);">No hay proyectos activos. Registra el primer proyecto desde el botón Nueva solicitud → Aprobar → Convertir en proyecto.</div>`;
+    } else {
+      board.innerHTML = cols.map(col=>{
+        const items = todos.filter(col.filter);
+        const cards = items.map(p=>`<div class="kb-card">
+          <div class="kb-card-title">${p.nombre}</div>
+          <div class="kb-card-meta">
+            ${semIcon(p.semaforo)}
+            <span>${p.gerencias?.nombre||'—'}</span>
+            ${p.avance_pct>0?`<span>· ${p.avance_pct}%</span>`:''}
+          </div>
+        </div>`).join('');
+        return `<div class="kb-col">
+          <div class="kb-col-hdr">${col.title} <span class="kb-cnt">${items.length}</span></div>
+          ${cards||'<div style="font-size:12px;color:var(--gray3);text-align:center;padding:20px 0;">Vacío</div>'}
+        </div>`;
+      }).join('');
+    }
+  }
+
+  if(tbl){
+    if(!todos.length){ empty(tbl,'Sin proyectos registrados'); return; }
+    tbl.innerHTML = todos.map(p=>`<tr>
+      <td class="td-mono">${p.codigo_cipd}</td>
+      <td style="font-weight:500;">${p.nombre}</td>
+      <td style="font-size:12px;">${p.lider?.nombre_completo||'—'}</td>
+      <td style="font-size:12px;">${p.gerencias?.nombre||'—'}</td>
+      <td>${perfilBadge(p.perfil_glpi)}</td>
+      <td>${progBar(p.avance_pct||0, p.semaforo)}</td>
+      <td style="font-size:12px;">${fmt(p.fecha_entrega)}</td>
+      <td>${semIcon(p.semaforo)}</td>
+      <td><button class="btn btn-outline btn-sm" onclick="openModal('avance-proyecto','${p.id}','${p.nombre.substring(0,30)}')">Avance</button></td>
+    </tr>`).join('');
+  }
 }
 
-function renderRiesgos(){
-  const tb=document.getElementById('tbl-riesgos');
-  if(!tb) return;
-  tb.innerHTML=RISKS.map(r=>`<tr>
-    <td style="font-weight:500;">${r.nombre}</td>
-    <td class="td-mono">${r.proyecto}</td>
-    <td style="text-align:center;font-weight:600;">${r.prob}</td>
-    <td style="text-align:center;font-weight:600;">${r.impacto}</td>
-    <td>${riesgoNivelBadge(r.nivel)}</td>
-    <td>${estadoBadge(r.estado)}</td>
-  </tr>`).join('');
-  buildHeatMap();
+// ── RIESGOS ────────────────────────────────────────────────────────
+async function renderRiesgos(){
+  const tb = document.getElementById('tbl-riesgos');
+  loading(tb);
+  const data = await loadRiesgos();
+  if(!data.length){ empty(tb,'Sin riesgos activos registrados'); }
+  else {
+    const nm={CRÍTICO:'badge-critico',ALTO:'badge-alto',MEDIO:'badge-medio',BAJO:'badge-bajo'};
+    tb.innerHTML = data.map(r=>`<tr>
+      <td style="font-weight:500;">${r.descripcion}</td>
+      <td class="td-mono">${r.proyectos?.codigo_cipd||'—'}</td>
+      <td style="text-align:center;font-weight:600;">${r.probabilidad}</td>
+      <td style="text-align:center;font-weight:600;">${r.impacto}</td>
+      <td><span class="badge ${nm[r.nivel_riesgo]||'badge-gray'}">${r.nivel_riesgo}</span></td>
+      <td>${estadoBadge(r.estado)}</td>
+    </tr>`).join('');
+  }
+  buildHeatMap(data);
 }
 
-function buildHeatMap(){
-  const c=document.getElementById('heat-map-container');
+function buildHeatMap(data){
+  const c = document.getElementById('heat-map-container');
   if(!c) return;
   let html='<div class="heat-grid">';
   html+='<div class="heat-label"></div>';
@@ -1349,194 +1273,473 @@ function buildHeatMap(){
     for(let i=1;i<=5;i++){
       const s=p*i;
       let bg,tc;
-      if(s>=16){bg='#FFDDE3';tc='#C0123A';}
+      if(s>=16){bg='#FFDAD8';tc='#C0123A';}
       else if(s>=9){bg='var(--amber-pale)';tc='#9A5500';}
-      else if(s>=4){bg:'#FFF9E0';bg='#FFF9E0';tc='#7A6200';}
-      else{bg='var(--green-pale)';tc='#006B52';}
-      const count=RISKS.filter(r=>r.prob===p&&r.impacto===i).length;
-      html+=`<div class="heat-cell" style="background:${bg};color:${tc};">${count>0?'●'.repeat(count):'·'}</div>`;
+      else if(s>=4){bg='#FFF9C2';tc='#7A6200';}
+      else{bg:'var(--green-pale)';bg='#D5F5D8';tc='#006B52';}
+      const count = data.filter(r=>r.probabilidad===p&&r.impacto===i).length;
+      html+=`<div class="heat-cell" style="background:${bg};color:${tc};">${count>0?'●'.repeat(Math.min(count,3))+'<br><span style="font-size:10px;">P'+p+'·I'+i+'</span>':'<span style="opacity:.4;font-size:10px;">P'+p+'·I'+i+'</span>'}</div>`;
     }
   }
   html+='</div>';
   c.innerHTML=html;
 }
 
-function renderSesion(){
-  const al=document.getElementById('agenda-list');
-  if(al) al.innerHTML=AGENDA.map(a=>`<div class="agenda-item">
-    <div class="agenda-time">${a.time}</div>
-    <div class="agenda-content"><div class="agenda-title">${a.title}</div><div class="agenda-desc">${a.desc}</div></div>
-  </div>`).join('');
-  const at=document.getElementById('tbl-acuerdos');
-  if(at) at.innerHTML=ACUERDOS.map(a=>`<tr>
-    <td style="color:var(--gray4);">${a.num}</td>
-    <td style="font-weight:500;font-size:12px;">${a.texto}</td>
-    <td style="font-size:12px;">${a.resp}</td>
-    <td style="font-size:11px;color:var(--gray4);">${a.fecha}</td>
-    <td>${estadoBadge(a.estado)}</td>
+// ── SESIONES ───────────────────────────────────────────────────────
+async function renderSesion(){
+  const sesiones = await loadSesiones();
+  const acuerdos = await loadAcuerdos();
+
+  // Agenda última sesión
+  const al = document.getElementById('agenda-list');
+  if(al){
+    const ult = sesiones[0];
+    if(ult && ult.agenda && Array.isArray(ult.agenda)){
+      al.innerHTML = ult.agenda.map(a=>`<div class="agenda-item">
+        <div class="agenda-time">${a.duracion_min} min</div>
+        <div class="agenda-content">
+          <div class="agenda-title">${a.titulo}</div>
+          <div class="agenda-desc">Sesión #${ult.numero_sesion} · ${fmt(ult.fecha)}</div>
+        </div>
+      </div>`).join('');
+    } else if(ult){
+      al.innerHTML=`<div class="agenda-item"><div class="agenda-content"><div class="agenda-title">Sesión #${ult.numero_sesion}</div><div class="agenda-desc">${fmt(ult.fecha)} · ${ult.tipo}</div></div></div>`;
+    } else {
+      al.innerHTML='<div style="padding:20px;color:var(--gray4);font-size:13px;">No hay sesiones registradas aún.</div>';
+    }
+  }
+
+  // Tabla acuerdos
+  const at = document.getElementById('tbl-acuerdos');
+  if(at){
+    if(!acuerdos.length){ empty(at,'Sin acuerdos pendientes'); }
+    else {
+      at.innerHTML = acuerdos.map(a=>`<tr>
+        <td style="color:var(--gray4);">${a.numero_acuerdo||'—'}</td>
+        <td style="font-weight:500;font-size:12px;">${a.descripcion}</td>
+        <td style="font-size:12px;">${a.responsable?.nombre_completo||'—'}</td>
+        <td style="font-size:11px;color:var(--gray4);">${fmt(a.fecha_compromiso)}</td>
+        <td>${estadoBadge(a.estado)}</td>
+      </tr>`).join('');
+    }
+  }
+
+  // Historial
+  const hb = document.querySelector('#page-sesion .card:last-child tbody');
+  if(hb && sesiones.length){
+    const tipos={ordinaria:'badge-blue',estrategica:'badge-teal',extraordinaria:'badge-orange',cierre:'badge-gray'};
+    hb.innerHTML = sesiones.map(s=>`<tr>
+      <td class="td-bold">#${s.numero_sesion}</td>
+      <td><span class="badge ${tipos[s.tipo]||'badge-gray'}">${s.tipo}</span></td>
+      <td>${fmt(s.fecha)}</td>
+      <td style="text-align:center;">${s.miembros_presentes||'—'}</td>
+      <td style="text-align:center;">${s.quorum_confirmado?'✓':'—'}</td>
+      <td><span class="badge ${s.acta_enviada?'badge-teal':'badge-gray'}">${s.acta_enviada?'Enviada':'Pendiente'}</span></td>
+    </tr>`).join('');
+  }
+}
+
+// ── GLPI ───────────────────────────────────────────────────────────
+async function renderGLPI(filtro){
+  const tb = document.getElementById('tbl-glpi');
+  loading(tb);
+  const data = await loadProyectos(false);
+  const fil  = filtro ? data.filter(p=>p.perfil_glpi===filtro) : data;
+  if(!fil.length){ empty(tb,'Sin proyectos vinculados a GLPI'); return; }
+  tb.innerHTML = fil.map(p=>`<tr>
+    <td class="td-mono">${p.glpi_id||'—'}</td>
+    <td class="td-mono">${p.codigo_cipd}</td>
+    <td style="font-weight:500;">${p.nombre}</td>
+    <td style="font-size:12px;">${p.gerencias?.nombre||'—'}</td>
+    <td>${perfilBadge(p.perfil_glpi)}</td>
+    <td>${progBar(p.avance_pct||0, p.semaforo)}</td>
+    <td style="font-size:12px;color:${p.perfil_glpi==='C'?'var(--red)':'var(--gray4)'};">${['B','C'].includes(p.perfil_glpi)?'Sí':'No'}</td>
+    <td>${estadoBadge(p.estado)}</td>
+    <td><button class="btn btn-outline btn-sm" onclick="openModal('avance-proyecto','${p.id}','${p.nombre.substring(0,30)}')">Ficha</button></td>
   </tr>`).join('');
 }
 
-function renderGLPI(filter){
-  const tb=document.getElementById('tbl-glpi');
-  if(!tb) return;
-  const data=filter?PROJECTS.filter(p=>p.perfil===filter):PROJECTS;
-  tb.innerHTML=data.map(p=>`<tr>
-    <td class="td-mono">${p.glpi}</td>
-    <td class="td-mono">${p.id}</td>
-    <td style="font-weight:500;">${p.name}</td>
-    <td style="font-size:12px;">${p.gerencia}</td>
-    <td>${perfilBadge(p.perfil)}</td>
-    <td>${progBar(p.avance,p.status)}</td>
-    <td style="font-size:12px;color:${p.perfil==='C'?'var(--red)':'var(--gray4)'};">${p.perfil==='C'||p.perfil==='B'?'Sí':'No'}</td>
-    <td>${estadoBadge(p.perfil==='C'?'En evaluación':p.perfil==='D'?'Aplazado':'Aprobado')}</td>
-    <td><button class="btn btn-outline btn-sm" onclick="toast('Ficha ${p.id}','ok')">Ficha</button></td>
-  </tr>`).join('');
+// ── INFORME ────────────────────────────────────────────────────────
+async function renderInforme(){
+  const [proyectos, acuerdos, riesgos, kpis] = await Promise.all([
+    loadProyectos(true), loadAcuerdos(), loadRiesgos(), loadKPIs()
+  ]);
+  const hoy = new Date().toLocaleDateString('es-HN',{day:'2-digit',month:'long',year:'numeric'});
+  const rojos    = proyectos.filter(p=>p.semaforo==='rojo');
+  const amarillos= proyectos.filter(p=>p.semaforo==='amarillo');
+  const verdes   = proyectos.filter(p=>p.semaforo==='verde');
+  const vencidos = acuerdos.filter(a=>a.fecha_compromiso && new Date(a.fecha_compromiso)<new Date());
+
+  const prev = document.getElementById('informe-preview');
+  if(prev) prev.innerHTML = `
+    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px;">Informe Ejecutivo CIPD</div>
+    <div style="font-size:12px;color:var(--gray4);margin-bottom:14px;">Generado el ${hoy} · Secretaría Ejecutiva CIPD</div>
+    <div class="inf-section">
+      <div class="inf-section-title" style="color:var(--green);">Resumen del portafolio activo</div>
+      <div class="inf-item"><div class="inf-dot" style="background:var(--green)"></div><div>${verdes.length} proyecto(s) en marcha con semáforo verde.</div></div>
+      <div class="inf-item"><div class="inf-dot" style="background:var(--amber)"></div><div>${amarillos.length} proyecto(s) con riesgo de retraso (semáforo amarillo).</div></div>
+      <div class="inf-item"><div class="inf-dot" style="background:var(--red)"></div><div>${rojos.length} proyecto(s) en estado crítico que requieren atención del Comité.</div></div>
+    </div>
+    <div class="inf-section">
+      <div class="inf-section-title" style="color:var(--red);">Proyectos críticos (rojo)</div>
+      ${rojos.length ? rojos.map(p=>`<div class="inf-item"><div class="inf-dot" style="background:var(--red)"></div><div>${p.codigo_cipd} — ${p.nombre}. Avance: ${p.avance_pct}%. ${p.bloqueos_activos||''}</div></div>`).join('')
+        : '<div class="inf-item"><div class="inf-dot" style="background:var(--green)"></div><div>Sin proyectos críticos en este período.</div></div>'}
+    </div>
+    <div class="inf-section">
+      <div class="inf-section-title" style="color:var(--blue);">Acuerdos pendientes</div>
+      ${acuerdos.length ? `<div class="inf-item"><div class="inf-dot" style="background:var(--blue)"></div><div>${acuerdos.length} acuerdo(s) activos. ${vencidos.length>0?vencidos.length+' vencido(s) sin completar.':''}</div></div>`
+        : '<div class="inf-item"><div class="inf-dot" style="background:var(--green)"></div><div>Sin acuerdos pendientes.</div></div>'}
+    </div>
+    <div class="inf-section">
+      <div class="inf-section-title" style="color:var(--orange);">Riesgos activos del portafolio</div>
+      ${riesgos.filter(r=>r.nivel_riesgo==='CRÍTICO'||r.nivel_riesgo==='ALTO').slice(0,3).map(r=>`<div class="inf-item"><div class="inf-dot" style="background:var(--orange)"></div><div>${r.descripcion} (${r.proyectos?.codigo_cipd||'—'}) — Nivel ${r.nivel_riesgo}</div></div>`).join('')
+        || '<div class="inf-item"><div class="inf-dot" style="background:var(--green)"></div><div>Sin riesgos críticos activos.</div></div>'}
+    </div>`;
+
+  // KPIs
+  const kpib = document.getElementById('kpis-bars');
+  if(kpib && kpis){
+    const pct = kpis.pct_entrega_tiempo||0;
+    const act = kpis.proyectos_activos||0;
+    const rj  = kpis.proyectos_rojo||0;
+    kpib.innerHTML = `
+      <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;">Entrega a tiempo</span><span style="font-size:13px;font-weight:700;color:${pct>=80?'var(--green)':'var(--amber)'};">${pct}% / meta 80%</span></div><div class="prog-wrap"><div class="prog-fill ${pct>=80?'prog-green':'prog-yellow'}" style="width:${Math.min(pct,100)}%"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;">Proyectos activos</span><span style="font-size:13px;font-weight:700;">${act}</span></div><div class="prog-wrap"><div class="prog-fill" style="width:100%"></div></div></div>
+      <div><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:12px;">Proyectos en rojo</span><span style="font-size:13px;font-weight:700;color:${rj<=2?'var(--green)':'var(--red)'};">${rj} / meta ≤2</span></div><div class="prog-wrap"><div class="prog-fill ${rj<=2?'prog-green':'prog-red'}" style="width:${Math.min(rj*20,100)}%"></div></div></div>
+    `;
+  }
 }
+
+// ── CHECKLIST ──────────────────────────────────────────────────────
+const CHECKLIST_ITEMS=[
+  {texto:'Exportar tickets activos GLPI con categoría Desarrollo / Cambio',resp:'Admin GLPI',plazo:'Día 1'},
+  {texto:'Revisar cada ticket con el técnico asignado y completar la Ficha de Incorporación',resp:'Secretario + Gte. TI',plazo:'Días 2-4'},
+  {texto:'Identificar proyectos sin líder asignado, sin fecha de entrega o sin presupuesto',resp:'Secretario Ejecutivo',plazo:'Día 3'},
+  {texto:'Aplicar la Matriz de Criticidad CIPD a cada proyecto existente',resp:'Secretario Ejecutivo',plazo:'Días 4-5'},
+  {texto:'Clasificar cada proyecto en perfil A, B, C o D',resp:'Secretario Ejecutivo',plazo:'Día 5'},
+  {texto:'Construir el tablero inicial del portafolio con todos los proyectos clasificados',resp:'Secretario Ejecutivo',plazo:'Días 6-7'},
+  {texto:'Preparar propuesta de líderes para proyectos sin responsable',resp:'Gte. TI + Gte. Planificación',plazo:'Día 7'},
+  {texto:'Definir fechas de entrega tentativas para proyectos sin fecha',resp:'Gte. TI + Gerencias',plazo:'Días 7-8'},
+  {texto:'Preparar agenda de sesión constitutiva con portafolio completo adjunto',resp:'Secretario Ejecutivo',plazo:'Día 9'},
+  {texto:'Enviar convocatoria formal a todos los miembros del Comité (48 h antes)',resp:'Secretario Ejecutivo',plazo:'Día 10'},
+  {texto:'Sesión constitutiva: ratificar portafolio, asignar líderes, aprobar backlog inicial',resp:'Todos los miembros',plazo:'Día 12-15'},
+];
+let checkState = CHECKLIST_ITEMS.map(()=>false);
 
 function renderChecklist(){
   const c=document.getElementById('checklist-items');
   if(!c) return;
-  c.innerHTML=CHECKLIST.map((item,i)=>`<div class="check-item">
+  c.innerHTML=CHECKLIST_ITEMS.map((item,i)=>`<div class="check-item">
     <div class="check-box${checkState[i]?' checked':''}" onclick="toggleCheck(${i})" id="cb-${i}"></div>
     <div class="check-text-wrap">
       <div class="check-text" id="ct-${i}" style="${checkState[i]?'text-decoration:line-through;color:var(--gray3);':''}">${item.texto}</div>
       <div class="check-resp">${item.resp} · ${item.plazo}</div>
     </div>
   </div>`).join('');
-  updateCheckStats();
-}
-function toggleCheck(i){
-  checkState[i]=!checkState[i];
-  renderChecklist();
-}
-function updateCheckStats(){
   const done=checkState.filter(Boolean).length;
-  const total=checkState.length;
-  const pct=Math.round(done/total*100);
+  const pct=Math.round(done/checkState.length*100);
   document.getElementById('check-done').textContent=done;
-  document.getElementById('check-pending').textContent=total-done;
+  document.getElementById('check-pending').textContent=checkState.length-done;
   document.getElementById('check-pct').textContent=pct+'%';
   const bar=document.getElementById('check-bar');
   if(bar){bar.style.width=pct+'%';bar.style.background=pct===100?'var(--green)':pct>50?'var(--teal)':'var(--blue)';}
 }
-
-function switchTab(view,el){
-  ['kanban','tabla-proy'].forEach(v=>{const d=document.getElementById('view-'+v);if(d)d.style.display='none';});
-  const target=document.getElementById('view-'+view);
-  if(target) target.style.display='block';
+function toggleCheck(i){checkState[i]=!checkState[i];renderChecklist();}
+function switchTab(v,el){
+  ['kanban','tabla-proy'].forEach(x=>{const d=document.getElementById('view-'+x);if(d)d.style.display='none';});
+  const t=document.getElementById('view-'+v);if(t)t.style.display='block';
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  if(el) el.classList.add('active');
-  if(view==='tabla-proy') renderKanban();
+  if(el)el.classList.add('active');
+  if(v==='tabla-proy')renderKanban();
 }
 
-// ===== MODALS =====
-function openModal(type){
-  const bg=document.getElementById('modal-bg');
+// ── NAVEGACIÓN ─────────────────────────────────────────────────────
+const PAGE_TITLES={
+  dashboard:'Dashboard General',backlog:'Backlog de Solicitudes',
+  matriz:'Matriz de Criticidad',proyectos:'Proyectos Activos',
+  riesgos:'Gestión de Riesgos',sesion:'Sesiones & Actas',
+  glpi:'Integración GLPI',informe:'Informe Ejecutivo',checklist:'Lista de Verificación'
+};
+function nav(tab,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+tab)?.classList.add('active');
+  if(el){document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));el.classList.add('active');}
+  document.getElementById('topbar-title').textContent=PAGE_TITLES[tab]||tab;
+  const renders={
+    dashboard:renderDashboard,backlog:renderBacklog,matriz:renderDims,
+    proyectos:renderKanban,riesgos:renderRiesgos,sesion:renderSesion,
+    glpi:()=>renderGLPI(''),informe:renderInforme,checklist:renderChecklist
+  };
+  if(renders[tab]) renders[tab]();
+}
+
+// ── MODALES ────────────────────────────────────────────────────────
+async function openModal(type, extraId, extraName){
+  const ov=document.getElementById('modal-bg');
   const title=document.getElementById('modal-title');
   const body=document.getElementById('modal-body');
   const footer=document.getElementById('modal-footer');
-  bg.classList.add('open');
+  ov.classList.add('open');
+
+  // Cargar gerencias para selects
+  if(!GERENCIAS.length) GERENCIAS = await loadGerencias();
+  if(!USUARIOS.length)  USUARIOS  = await loadUsuarios();
+  const gerOpts = GERENCIAS.map(g=>`<option value="${g.id}">${g.nombre}</option>`).join('');
+  const usrOpts = USUARIOS.map(u=>`<option value="${u.id}">${u.nombre_completo}</option>`).join('');
 
   if(type==='nueva-solicitud'){
     title.textContent='Nueva solicitud de desarrollo';
     body.innerHTML=`<div class="form-row">
-      <div class="form-group form-full"><label>Nombre de la iniciativa</label><input type="text" placeholder="Ej: Sistema de gestión de averías"/></div>
-      <div class="form-group"><label>Gerencia solicitante</label><select><option>Distribución</option><option>Comercial</option><option>TI</option><option>Financiero</option><option>RRHH</option><option>Legal</option><option>Planificación</option><option>Atención al Cliente</option></select></div>
-      <div class="form-group"><label>ID Ticket GLPI</label><input type="text" placeholder="#4920"/></div>
-      <div class="form-group"><label>Patrocinador interno</label><input type="text" placeholder="Nombre del gerente"/></div>
-      <div class="form-group"><label>Fecha límite deseada</label><input type="date"/></div>
-      <div class="form-group form-full"><label>Problema o necesidad que resuelve</label><textarea placeholder="Describe el problema actual..."></textarea></div>
-      <div class="form-group form-full"><label>Beneficio esperado</label><textarea placeholder="Beneficio cuantificable preferiblemente..."></textarea></div>
-      <div class="form-group"><label>Recursos estimados (días/hombre)</label><input type="text" placeholder="Ej: 90 días"/></div>
-      <div class="form-group"><label>Presupuesto estimado (USD)</label><input type="text" placeholder="Ej: 25,000"/></div>
-      <div class="form-group form-full"><label>Dependencias con otros proyectos o sistemas</label><input type="text" placeholder="Ej: Requiere SCADA actualizado"/></div>
+      <div class="form-group form-full"><label>Nombre de la iniciativa *</label><input type="text" id="ns-nombre" placeholder="Ej: Sistema de gestión de averías"/></div>
+      <div class="form-group"><label>Gerencia solicitante *</label><select id="ns-gerencia"><option value="">— Selecciona —</option>${gerOpts}</select></div>
+      <div class="form-group"><label>ID Ticket GLPI</label><input type="text" id="ns-glpi" placeholder="#4920"/></div>
+      <div class="form-group"><label>Patrocinador interno</label><input type="text" id="ns-patrocinador" placeholder="Nombre del gerente que avala"/></div>
+      <div class="form-group"><label>Fecha límite deseada</label><input type="date" id="ns-fecha"/></div>
+      <div class="form-group"><label>Presupuesto estimado (USD)</label><input type="number" id="ns-presupuesto" placeholder="25000"/></div>
+      <div class="form-group form-full"><label>¿Qué problema o necesidad resuelve? *</label><textarea id="ns-problema" placeholder="Describe el problema actual..."></textarea></div>
+      <div class="form-group form-full"><label>Beneficio esperado</label><textarea id="ns-beneficio" placeholder="Beneficio cuantificable preferiblemente..."></textarea></div>
+      <div class="form-group"><label>Recursos estimados (días/hombre)</label><input type="number" id="ns-recursos" placeholder="90"/></div>
+      <div class="form-group form-full"><label>Dependencias con otros proyectos o sistemas</label><input type="text" id="ns-depend" placeholder="Ej: Requiere SCADA actualizado"/></div>
     </div>`;
-    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="closeModal();toast('Solicitud registrada — ID SOL-032 asignado','ok')">Registrar solicitud</button>`;
+    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitSolicitud()">Registrar solicitud</button>`;
   }
   else if(type==='nuevo-riesgo'){
+    const proyData = await loadProyectos(false);
+    const proyOpts = proyData.map(p=>`<option value="${p.id}">${p.codigo_cipd} — ${p.nombre.substring(0,30)}</option>`).join('');
     title.textContent='Registrar riesgo';
     body.innerHTML=`<div class="form-row">
-      <div class="form-group form-full"><label>Descripción del riesgo</label><input type="text" placeholder="Describe el riesgo identificado"/></div>
-      <div class="form-group"><label>Proyecto afectado</label><select>${PROJECTS.map(p=>`<option>${p.id} — ${p.name.substring(0,30)}</option>`).join('')}</select></div>
-      <div class="form-group"><label>Tipo de riesgo</label><select><option>Técnico</option><option>Recursos</option><option>Regulatorio</option><option>Organizacional</option><option>Interdependencia</option><option>Financiero</option></select></div>
-      <div class="form-group"><label>Probabilidad (1–5)</label><select><option>1 — Muy baja</option><option>2 — Baja</option><option>3 — Media</option><option>4 — Alta</option><option>5 — Muy alta</option></select></div>
-      <div class="form-group"><label>Impacto (1–5)</label><select><option>1 — Mínimo</option><option>2 — Bajo</option><option>3 — Moderado</option><option>4 — Alto</option><option>5 — Crítico</option></select></div>
-      <div class="form-group form-full"><label>Plan de mitigación</label><textarea placeholder="Acciones para reducir la probabilidad o impacto..."></textarea></div>
-      <div class="form-group"><label>Responsable de mitigación</label><input type="text" placeholder="Nombre o cargo"/></div>
-      <div class="form-group"><label>Fecha de revisión</label><input type="date"/></div>
+      <div class="form-group form-full"><label>Descripción del riesgo *</label><input type="text" id="nr-desc" placeholder="Describe el riesgo identificado"/></div>
+      <div class="form-group"><label>Proyecto afectado *</label><select id="nr-proyecto"><option value="">— Selecciona —</option>${proyOpts}</select></div>
+      <div class="form-group"><label>Tipo de riesgo</label><select id="nr-tipo"><option value="tecnico">Técnico</option><option value="recursos">Recursos</option><option value="regulatorio">Regulatorio</option><option value="organizacional">Organizacional</option><option value="interdependencia">Interdependencia</option><option value="financiero">Financiero</option></select></div>
+      <div class="form-group"><label>Probabilidad (1=muy baja, 5=muy alta)</label><select id="nr-prob">${[1,2,3,4,5].map(v=>`<option value="${v}">${v}</option>`).join('')}</select></div>
+      <div class="form-group"><label>Impacto (1=mínimo, 5=crítico)</label><select id="nr-imp">${[1,2,3,4,5].map(v=>`<option value="${v}">${v}</option>`).join('')}</select></div>
+      <div class="form-group form-full"><label>Plan de mitigación</label><textarea id="nr-plan" placeholder="Acciones para reducir la probabilidad o impacto..."></textarea></div>
+      <div class="form-group"><label>Responsable de mitigación</label><select id="nr-resp"><option value="">— Ninguno —</option>${usrOpts}</select></div>
+      <div class="form-group"><label>Fecha de revisión</label><input type="date" id="nr-fecha"/></div>
     </div>`;
-    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="closeModal();toast('Riesgo registrado en mapa de calor','ok')">Registrar riesgo</button>`;
+    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitRiesgo()">Registrar riesgo</button>`;
   }
   else if(type==='nuevo-acuerdo'){
+    const sesData = await loadSesiones();
+    const proyData= await loadProyectos(false);
+    const sesOpts = sesData.map(s=>`<option value="${s.id}">Sesión #${s.numero_sesion} — ${fmt(s.fecha)}</option>`).join('');
+    const proyOpts= proyData.map(p=>`<option value="${p.id}">${p.codigo_cipd} — ${p.nombre.substring(0,30)}</option>`).join('');
     title.textContent='Registrar acuerdo de sesión';
     body.innerHTML=`<div class="form-row">
-      <div class="form-group form-full"><label>Descripción del acuerdo</label><textarea placeholder="Describe el acuerdo tomado en sesión..."></textarea></div>
-      <div class="form-group"><label>Responsable</label><select><option>Gte. TI</option><option>Gte. Comercial</option><option>Gte. Distribución</option><option>Gte. Financiero</option><option>Gte. RRHH</option><option>Gte. Legal</option><option>Gte. Planificación</option><option>Gte. General</option><option>Secretaría CIPD</option></select></div>
-      <div class="form-group"><label>Fecha compromiso</label><input type="date"/></div>
-      <div class="form-group form-full"><label>Proyecto relacionado (opcional)</label><select><option>— Ninguno —</option>${PROJECTS.map(p=>`<option>${p.id} — ${p.name.substring(0,30)}</option>`).join('')}</select></div>
-      <div class="form-group form-full"><label>Observaciones</label><textarea placeholder="Notas adicionales del acuerdo..."></textarea></div>
+      <div class="form-group"><label>Sesión *</label><select id="na-sesion"><option value="">— Selecciona —</option>${sesOpts}</select></div>
+      <div class="form-group"><label>Tipo de acuerdo</label><select id="na-tipo"><option value="aprobacion">Aprobación</option><option value="rechazo">Rechazo</option><option value="aplazamiento">Aplazamiento</option><option value="asignacion">Asignación</option><option value="escalamiento">Escalamiento</option><option value="otro">Otro</option></select></div>
+      <div class="form-group form-full"><label>Descripción del acuerdo *</label><textarea id="na-desc" placeholder="Describe el acuerdo tomado en sesión..."></textarea></div>
+      <div class="form-group"><label>Responsable</label><select id="na-resp"><option value="">— Sin asignar —</option>${usrOpts}</select></div>
+      <div class="form-group"><label>Fecha compromiso</label><input type="date" id="na-fecha"/></div>
+      <div class="form-group form-full"><label>Proyecto relacionado (opcional)</label><select id="na-proyecto"><option value="">— Ninguno —</option>${proyOpts}</select></div>
+      <div class="form-group form-full"><label>Observaciones</label><textarea id="na-obs" placeholder="Notas adicionales..."></textarea></div>
     </div>`;
-    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="closeModal();toast('Acuerdo registrado en acta de sesión','ok')">Guardar acuerdo</button>`;
+    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitAcuerdo()">Guardar acuerdo</button>`;
   }
   else if(type==='nueva-sesion'){
     title.textContent='Convocar nueva sesión';
     body.innerHTML=`<div class="form-row">
-      <div class="form-group"><label>Tipo de sesión</label><select><option>Ordinaria (quincenal)</option><option>Estratégica (trimestral)</option><option>Extraordinaria</option><option>Cierre de proyecto</option></select></div>
-      <div class="form-group"><label>Fecha propuesta</label><input type="date"/></div>
-      <div class="form-group"><label>Hora de inicio</label><input type="text" placeholder="09:00 AM"/></div>
-      <div class="form-group"><label>Modalidad</label><select><option>Presencial</option><option>Virtual</option><option>Híbrida</option></select></div>
-      <div class="form-group form-full"><label>Temas prioritarios de la agenda</label><textarea placeholder="Lista los temas que se deben tratar en esta sesión..."></textarea></div>
+      <div class="form-group"><label>Tipo de sesión</label><select id="se-tipo"><option value="ordinaria">Ordinaria (quincenal)</option><option value="estrategica">Estratégica (trimestral)</option><option value="extraordinaria">Extraordinaria</option><option value="cierre">Cierre de proyecto</option></select></div>
+      <div class="form-group"><label>Fecha *</label><input type="date" id="se-fecha"/></div>
+      <div class="form-group"><label>Hora de inicio</label><input type="time" id="se-hora" value="09:00"/></div>
+      <div class="form-group"><label>Modalidad</label><select id="se-modal"><option value="presencial">Presencial</option><option value="virtual">Virtual</option><option value="hibrida">Híbrida</option></select></div>
+      <div class="form-group form-full"><label>Miembros esperados</label><input type="number" id="se-miembros" value="9"/></div>
     </div>
-    <div class="alert alert-info" style="margin-top:8px;">La convocatoria debe enviarse con al menos 48 horas de anticipación. Las solicitudes deben estar registradas 72 h antes.</div>`;
-    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-primary" onclick="closeModal();toast('Convocatoria enviada a los 9 miembros del Comité','ok')">Enviar convocatoria</button>`;
+    <div class="alert alert-info">La convocatoria debe enviarse con al menos 48 horas de anticipación. Las solicitudes deben estar registradas 72 h antes.</div>`;
+    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitSesion()">Guardar y convocar</button>`;
+  }
+  else if(type==='avance-proyecto'){
+    title.textContent=`Registrar avance — ${extraName||'Proyecto'}`;
+    body.innerHTML=`<div class="form-row">
+      <div class="form-group"><label>Avance actual (%)</label><input type="number" id="av-pct" min="0" max="100" placeholder="0"/></div>
+      <div class="form-group"><label>Semáforo</label><select id="av-sem"><option value="verde">Verde — En marcha</option><option value="amarillo">Amarillo — Con riesgo</option><option value="rojo">Rojo — Crítico</option></select></div>
+      <div class="form-group form-full"><label>Hito completado en este período</label><input type="text" id="av-hito" placeholder="Ej: Módulo de facturación entregado"/></div>
+      <div class="form-group form-full"><label>Bloqueos activos</label><textarea id="av-bloqueos" placeholder="Impedimentos que están frenando el avance..."></textarea></div>
+      <div class="form-group form-full"><label>Notas adicionales</label><textarea id="av-notas" placeholder="Cualquier información relevante para el Comité..."></textarea></div>
+    </div>`;
+    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="submitAvance('${extraId}')">Guardar avance</button>`;
   }
   else if(type==='ficha-incorporacion'){
     title.textContent='Ficha de Incorporación al Portafolio CIPD';
     body.innerHTML=`<div class="alert alert-info" style="margin-bottom:12px;">Completa esta ficha para cada ticket GLPI que cumple criterios de escalamiento al CIPD.</div>
     <div class="form-row">
-      <div class="form-group"><label>ID Ticket GLPI</label><input type="text" placeholder="#4920"/></div>
-      <div class="form-group"><label>ID CIPD a asignar</label><input type="text" placeholder="TI-023, GDist-025..."/></div>
-      <div class="form-group form-full"><label>Nombre del proyecto</label><input type="text" placeholder="Nombre descriptivo estandarizado"/></div>
-      <div class="form-group"><label>Gerencia responsable</label><select><option>Distribución</option><option>Comercial</option><option>TI</option><option>Financiero</option><option>RRHH</option><option>Legal</option><option>Planificación</option></select></div>
-      <div class="form-group"><label>Líder asignado</label><input type="text" placeholder="Nombre del responsable técnico"/></div>
-      <div class="form-group"><label>Perfil inicial</label><select><option>A — En control</option><option>B — Con riesgo</option><option>C — Crítico</option><option>D — A revisar</option></select></div>
-      <div class="form-group"><label>Avance actual (%)</label><input type="number" min="0" max="100" placeholder="0"/></div>
-      <div class="form-group"><label>Fecha de inicio real</label><input type="date"/></div>
-      <div class="form-group"><label>Fecha de entrega comprometida</label><input type="date"/></div>
-      <div class="form-group form-full"><label>Bloqueos activos identificados</label><textarea placeholder="Describe los impedimentos conocidos..."></textarea></div>
-      <div class="form-group form-full"><label>Riesgos identificados</label><textarea placeholder="Riesgos ya materializados o latentes..."></textarea></div>
-      <div class="form-group"><label>Presupuesto asignado (USD)</label><input type="text" placeholder="Ej: 35,000"/></div>
-      <div class="form-group"><label>Próximo hito</label><input type="text" placeholder="Siguiente entrega o revisión esperada"/></div>
+      <div class="form-group"><label>ID Ticket GLPI</label><input type="text" id="fi-glpi" placeholder="#4920"/></div>
+      <div class="form-group"><label>Código CIPD a asignar</label><input type="text" id="fi-codigo" placeholder="TI-023, GDist-025..."/></div>
+      <div class="form-group form-full"><label>Nombre del proyecto *</label><input type="text" id="fi-nombre" placeholder="Nombre descriptivo estandarizado"/></div>
+      <div class="form-group"><label>Gerencia responsable *</label><select id="fi-gerencia"><option value="">— Selecciona —</option>${gerOpts}</select></div>
+      <div class="form-group"><label>Líder asignado</label><select id="fi-lider"><option value="">— Sin asignar —</option>${usrOpts}</select></div>
+      <div class="form-group"><label>Perfil inicial</label><select id="fi-perfil"><option value="A">A — En control</option><option value="B">B — Con riesgo</option><option value="C">C — Crítico</option><option value="D">D — A revisar</option></select></div>
+      <div class="form-group"><label>Avance actual (%)</label><input type="number" id="fi-avance" min="0" max="100" value="0"/></div>
+      <div class="form-group"><label>Fecha de entrega comprometida</label><input type="date" id="fi-fecha"/></div>
+      <div class="form-group"><label>Presupuesto aprobado (USD)</label><input type="number" id="fi-presupuesto" placeholder="35000"/></div>
+      <div class="form-group"><label>Próximo hito</label><input type="text" id="fi-hito" placeholder="Siguiente entrega esperada"/></div>
+      <div class="form-group form-full"><label>Bloqueos activos identificados</label><textarea id="fi-bloqueos" placeholder="Impedimentos conocidos..."></textarea></div>
     </div>`;
-    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button><button class="btn btn-success" onclick="closeModal();toast('Ficha de incorporación registrada. Proyecto vinculado a CIPD','ok')">Guardar ficha</button>`;
+    footer.innerHTML=`<button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-success" onclick="submitFicha()">Guardar en CIPD</button>`;
   }
 }
 function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
 
-// ===== TOAST =====
+// ── SUBMIT HANDLERS ───────────────────────────────────────────────
+async function submitSolicitud(){
+  const nombre = document.getElementById('ns-nombre')?.value?.trim();
+  const gerId  = document.getElementById('ns-gerencia')?.value;
+  if(!nombre){ toast('El nombre de la iniciativa es obligatorio','warn'); return; }
+  if(!gerId){ toast('Selecciona una gerencia','warn'); return; }
+  const mid = await getMiId();
+  const res = await saveSolicitud({
+    nombre,
+    gerencia_id: gerId,
+    glpi_id: document.getElementById('ns-glpi')?.value||null,
+    patrocinador: document.getElementById('ns-patrocinador')?.value||null,
+    fecha_limite_deseada: document.getElementById('ns-fecha')?.value||null,
+    presupuesto_usd: parseFloat(document.getElementById('ns-presupuesto')?.value)||null,
+    problema_que_resuelve: document.getElementById('ns-problema')?.value||null,
+    beneficio_esperado: document.getElementById('ns-beneficio')?.value||null,
+    recursos_dias: parseInt(document.getElementById('ns-recursos')?.value)||null,
+    dependencias: document.getElementById('ns-depend')?.value||null,
+    solicitante_id: mid,
+  });
+  closeModal();
+  if(res){ toast(`Solicitud registrada — Código: ${res.codigo_cipd}`,'ok'); renderBacklog(); }
+  else toast('Error al guardar. Revisa los campos e intenta de nuevo.','err');
+}
+
+async function submitRiesgo(){
+  const desc = document.getElementById('nr-desc')?.value?.trim();
+  const proy = document.getElementById('nr-proyecto')?.value;
+  if(!desc||!proy){ toast('Descripción y proyecto son obligatorios','warn'); return; }
+  const res = await saveRiesgo({
+    descripcion: desc,
+    proyecto_id: proy,
+    tipo_riesgo: document.getElementById('nr-tipo')?.value,
+    probabilidad: parseInt(document.getElementById('nr-prob')?.value)||1,
+    impacto: parseInt(document.getElementById('nr-imp')?.value)||1,
+    plan_mitigacion: document.getElementById('nr-plan')?.value||null,
+    responsable_id: document.getElementById('nr-resp')?.value||null,
+    fecha_revision: document.getElementById('nr-fecha')?.value||null,
+  });
+  closeModal();
+  if(res){ toast('Riesgo registrado en el mapa','ok'); renderRiesgos(); }
+  else toast('Error al guardar el riesgo','err');
+}
+
+async function submitAcuerdo(){
+  const ses  = document.getElementById('na-sesion')?.value;
+  const desc = document.getElementById('na-desc')?.value?.trim();
+  if(!ses||!desc){ toast('Sesión y descripción son obligatorios','warn'); return; }
+  const res = await saveAcuerdo({
+    sesion_id: ses,
+    descripcion: desc,
+    tipo_acuerdo: document.getElementById('na-tipo')?.value,
+    responsable_id: document.getElementById('na-resp')?.value||null,
+    fecha_compromiso: document.getElementById('na-fecha')?.value||null,
+    proyecto_id: document.getElementById('na-proyecto')?.value||null,
+    observaciones: document.getElementById('na-obs')?.value||null,
+  });
+  closeModal();
+  if(res){ toast('Acuerdo registrado en acta','ok'); renderSesion(); }
+  else toast('Error al guardar el acuerdo','err');
+}
+
+async function submitSesion(){
+  const fecha = document.getElementById('se-fecha')?.value;
+  if(!fecha){ toast('La fecha es obligatoria','warn'); return; }
+  const res = await saveSesion({
+    tipo: document.getElementById('se-tipo')?.value,
+    fecha,
+    hora_inicio: document.getElementById('se-hora')?.value||null,
+    modalidad: document.getElementById('se-modal')?.value,
+    miembros_presentes: parseInt(document.getElementById('se-miembros')?.value)||9,
+    estado:'programada',
+  });
+  closeModal();
+  if(res){ toast(`Sesión #${res.numero_sesion} creada y convocatoria lista`,'ok'); renderSesion(); }
+  else toast('Error al crear la sesión','err');
+}
+
+async function submitAvance(proyId){
+  const pct = parseInt(document.getElementById('av-pct')?.value)||0;
+  if(pct<0||pct>100){ toast('El avance debe estar entre 0 y 100','warn'); return; }
+  const res = await updateAvance(
+    proyId, pct,
+    document.getElementById('av-sem')?.value,
+    document.getElementById('av-hito')?.value||null,
+    document.getElementById('av-bloqueos')?.value||null,
+    document.getElementById('av-notas')?.value||null,
+  );
+  closeModal();
+  if(res){ toast(`Avance ${pct}% guardado. Proyecto actualizado.`,'ok'); renderKanban(); }
+  else toast('Error al guardar el avance','err');
+}
+
+async function submitFicha(){
+  const nombre = document.getElementById('fi-nombre')?.value?.trim();
+  const gerId  = document.getElementById('fi-gerencia')?.value;
+  const codigo = document.getElementById('fi-codigo')?.value?.trim();
+  if(!nombre||!gerId||!codigo){ toast('Nombre, gerencia y código son obligatorios','warn'); return; }
+  const res = await saveProyecto({
+    codigo_cipd: codigo,
+    nombre,
+    glpi_id: document.getElementById('fi-glpi')?.value||null,
+    gerencia_id: gerId,
+    lider_id: document.getElementById('fi-lider')?.value||null,
+    perfil_glpi: document.getElementById('fi-perfil')?.value||'A',
+    avance_pct: parseInt(document.getElementById('fi-avance')?.value)||0,
+    fecha_entrega: document.getElementById('fi-fecha')?.value||null,
+    presupuesto_aprobado: parseFloat(document.getElementById('fi-presupuesto')?.value)||null,
+    proximo_hito: document.getElementById('fi-hito')?.value||null,
+    bloqueos_activos: document.getElementById('fi-bloqueos')?.value||null,
+    estado:'activo',
+  });
+  closeModal();
+  if(res){ toast(`Proyecto ${codigo} incorporado al portafolio CIPD`,'ok'); renderKanban(); }
+  else toast('Error al guardar la ficha. Verifica que el código CIPD no esté duplicado.','err');
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────
 function toast(msg,type='ok'){
   const w=document.getElementById('toast-wrap');
   const t=document.createElement('div');
   t.className=`toast toast-${type==='ok'?'ok':type==='warn'?'warn':'err'}`;
   t.innerHTML=`<span style="font-size:14px;">${type==='ok'?'✓':type==='warn'?'⚠':'✕'}</span>${msg}`;
   w.appendChild(t);
-  setTimeout(()=>t.remove(),3000);
+  setTimeout(()=>t.remove(),3500);
 }
 
-// ===== INIT =====
-renderDashboard();
-renderSesion();
 
-// ── Entry point ──────────────────────────────────────────────────────
-// Sobreescribe el init original para que la app espere autenticación
-window.addEventListener('DOMContentLoaded', () => {
-  // Ocultar la app hasta que auth confirme sesión
-  document.querySelector('.shell').style.visibility = 'hidden';
-  authInit().then(() => {
-    // renderDashboard y renderSesion ya están en el script original
-    // aquí nos aseguramos que corran después del login
+// ── Patch showApp to make shell visible and load dashboard ──────────
+const _origShowApp = showApp;
+showApp = function(user) {
+  _origShowApp(user);
+  const shell = document.getElementById('app-shell');
+  if(shell) shell.style.visibility = 'visible';
+  // Update topbar subtitle with today's date
+  const hoy = new Date().toLocaleDateString('es-HN',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+  const sub = document.getElementById('topbar-sub');
+  if(sub) sub.textContent = 'CIPD — ' + hoy;
+  // Load initial data
+  renderDashboard();
+  renderChecklist();
+  // Update backlog badge
+  loadSolicitudes().then(s=>{
+    const b=document.getElementById('badge-backlog');
+    if(b) b.textContent=s.length;
   });
+  loadRiesgos().then(r=>{
+    const b=document.getElementById('badge-riesgos');
+    if(b) b.textContent=r.length;
+  });
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+  authInit();
 });
 </script>
 </body>
